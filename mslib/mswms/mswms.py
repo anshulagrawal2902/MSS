@@ -31,7 +31,6 @@ import sys
 
 from mslib import __version__
 from mslib.utils import setup_logging, LOGGER
-# from mslib.mswms.wms import app as application
 
 
 def main():
