@@ -87,7 +87,8 @@ def main():
     setup_logging(logfile=args.logfile, levelno= int(args.loglevel))
 
     # keep the import after the version check. This creates all layers.
-    from mslib.mswms.wms import mswms_settings, server, app as application
+    from mslib.mswms.wms import mswms_settings, server
+    from mslib.mswms.wms import app as application
 
     if args.action == "gallery":
         if args.plot_types is None:
