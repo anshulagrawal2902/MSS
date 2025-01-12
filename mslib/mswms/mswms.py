@@ -31,7 +31,7 @@ import sys
 
 from mslib import __version__
 from mslib.utils import setup_logging, LOGGER
-
+from mslib.mswms.wms import app as application
 
 def main():
     parser = argparse.ArgumentParser()
@@ -88,7 +88,6 @@ def main():
 
     # keep the import after the version check. This creates all layers.
     from mslib.mswms.wms import mswms_settings, server
-    from mslib.mswms.wms import app as application
 
     if args.action == "gallery":
         if args.plot_types is None:
