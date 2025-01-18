@@ -74,8 +74,8 @@ class CustomFormatter(logging.Formatter):
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
-    
-def setup_logging(levelno=logging.INFO, logfile = None,):
+
+def setup_logging(levelno=logging.INFO, logfile=None):
     LOGGER = logging.getLogger(__name__)
     # this is necessary as "someone" has already initialized logging, preventing basicConfig from doing stuff
     for ch in LOGGER.handlers:
