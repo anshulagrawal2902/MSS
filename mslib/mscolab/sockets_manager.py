@@ -35,6 +35,7 @@ from mslib.mscolab.models import MessageType, Permission, User
 from mslib.mscolab.utils import get_message_dict
 from mslib.mscolab.utils import get_session_id, get_user_id
 from mslib.mscolab.conf import mscolab_settings
+from mslib.utils import LOGGER
 
 socketio = SocketIO(logger=mscolab_settings.SOCKETIO_LOGGER, engineio_logger=mscolab_settings.ENGINEIO_LOGGER,
                     cors_allowed_origins=("*" if not hasattr(mscolab_settings, "CORS_ORIGINS") or
@@ -56,10 +57,10 @@ class SocketsManager:
         self.fm = file_manager
 
     def handle_connect(self):
-        logging.debug(request.sid)
+        LOGGER.debug(request.sid)
 
     def handle_operation_selected(self, json_config):
-        logging.debug("Operation selected: {}".format(json_config))
+        LOGGER.debug("Operation selected: {}".format(json_config))
         token = json_config['token']
         op_id = json_config['op_id']
         user = User.verify_auth_token(token)
@@ -121,7 +122,7 @@ class SocketsManager:
         """
         json is a dictionary version of data sent to backend
         """
-        logging.info('received json: ' + str(json_config))
+        LOGGER.info('received json: ' + str(json_config))
         # authenticate socket
         token = json_config['token']
         user = User.verify_auth_token(token)
@@ -153,14 +154,14 @@ class SocketsManager:
         self.sockets.append(socket_storage)
 
     def handle_disconnect(self):
-        logging.debug("Handling disconnect.")
+        LOGGER.debug("Handling disconnect.")
 
         # remove the user from any active operations
         user_id = get_user_id(self.sockets, request.sid)
         if user_id:
             self.update_active_users(user_id)
 
-        logging.debug(f"Disconnected: {request.sid}")
+        LOGGER.debug(f"Disconnected: {request.sid}")
         # remove socket from socket_storage
         self.sockets[:] = [d for d in self.sockets if d['s_id'] != request.sid]
 
@@ -172,7 +173,7 @@ class SocketsManager:
             if user_id in user_ids:
                 user_ids.remove(user_id)
                 active_count = len(user_ids)
-                logging.debug(f"Updated {op_id}: {active_count} active users")
+                LOGGER.debug(f"Updated {op_id}: {active_count} active users")
                 if user_ids:
                     # Emit update if there are still active users
                     socketio.emit('active-user-update', {'op_id': op_id, 'count': active_count})
@@ -290,7 +291,7 @@ class SocketsManager:
                 # emit file-changed event to trigger reload of flight track
                 socketio.emit('file-changed', json.dumps({"op_id": op_id, "u_id": user.id}))
         else:
-            logging.debug("Auth Token expired!")
+            LOGGER.debug("Auth Token expired!")
 
     def emit_file_change(self, op_id):
         socketio.emit('file-changed', json.dumps({"op_id": op_id}))
@@ -309,7 +310,7 @@ class SocketsManager:
         if access_level is None:
             perm = Permission.query.filter_by(u_id=u_id, op_id=op_id).first()
             access_level = perm.access_level
-            logging.debug("access_level by database query")
+            LOGGER.debug("access_level by database query")
 
         socketio.emit('update-permission', json.dumps({"op_id": op_id,
                                                        "u_id": u_id,

@@ -32,6 +32,7 @@ from sqlalchemy.exc import IntegrityError
 from mslib.mscolab.conf import mscolab_settings
 from mslib.mscolab.models import User, db, Permission, Operation
 from mslib.mscolab.server import APP as app
+from mslib.utils import LOGGER
 
 
 # Todo: refactor move to mscolab.utils
@@ -88,7 +89,7 @@ def add_all_users_default_operation(path='TEMPLATE', description="Operation to k
             return True
         except IntegrityError as err:
             db.session.rollback()
-            logging.debug("Error writing to db: %s", err)
+            LOGGER.debug("Error writing to db: %s", err)
         db.session.close()
 
 
@@ -98,7 +99,7 @@ def delete_user(email):
     with app.app_context():
         user = User.query.filter_by(emailid=str(email)).first()
         if user:
-            logging.info("User: %s deleted from db", email)
+            LOGGER.info("User: %s deleted from db", email)
             db.session.delete(user)
             db.session.commit()
             db.session.close()
@@ -122,10 +123,10 @@ def add_user(email, username, password):
             db.session.add(db_user)
             db.session.commit()
             db.session.close()
-            logging.info("Userdata: %s %s %s", email, username, password)
+            LOGGER.info("Userdata: %s %s %s", email, username, password)
             return True
         else:
-            logging.info("%s already in db", user_name_exists)
+            LOGGER.info("%s already in db", user_name_exists)
     return False
 
 
@@ -194,7 +195,7 @@ def add_user_to_operation(path=None, access_level='admin', emailid=None):
                     return True
                 except IntegrityError as err:
                     db.session.rollback()
-                    logging.debug("Error writing to db: %s", err)
+                    LOGGER.debug("Error writing to db: %s", err)
                 db.session.close()
     return False
 

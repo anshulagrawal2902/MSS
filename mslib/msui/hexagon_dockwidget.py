@@ -32,11 +32,12 @@ from mslib.msui.qt5 import ui_hexagon_dockwidget as ui
 from mslib.msui import flighttrack as ft
 from mslib.utils.coordinate import rotate_point
 from mslib.utils.config import config_loader
+from mslib.utils import LOGGER
 
 
 class HexagonException(Exception):
     def __init__(self, error_string):
-        logging.debug("%s", error_string)
+        LOGGER.debug("%s", error_string)
 
 
 def create_hexagon(center_lat, center_lon, radius, angle=0., clockwise=True):

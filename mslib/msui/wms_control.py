@@ -55,7 +55,7 @@ import mslib.utils.ogcwms as ogcwms
 from mslib.utils.time import parse_iso_datetime, parse_iso_duration
 from mslib.utils.auth import save_password_to_keyring, get_auth_from_url_and_name
 from mslib.utils.config import modify_config_file
-
+from mslib.utils import LOGGER
 
 WMS_SERVICE_CACHE = {}
 WMS_URL_LIST = QtGui.QStandardItemModel()
@@ -195,7 +195,7 @@ class MSUIWebMapService(ogcwms.WebMapService):
         complete_url = urllib.parse.urlunparse((str(""), str(""), str(base_url), str(""), data, str("")))
         if return_only_url:
             return complete_url
-        logging.debug("Retrieving image from '%s'", complete_url)
+        LOGGER.debug("Retrieving image from '%s'", complete_url)
         # --(mss)
 
         # (mss) owslib.util.openURL checks for ServiceExceptions and raises a
@@ -299,7 +299,7 @@ class WMSMapFetcher(QtCore.QObject):
             self.map_imgs.append(self.fetch_map(layer, kwargs, use_cache, md5_filename))
             self.legend_imgs.append(self.fetch_legend(use_cache=use_cache, **legend_kwargs))
         except Exception as ex:
-            logging.error("MapPrefetcher Exception %s - %s.", type(ex), ex)
+            LOGGER.error("MapPrefetcher Exception %s - %s.", type(ex), ex)
             # emit finished so progress dialog will be closed
             self.finished.emit(None, None, None, None, None, None, md5_filename)
             self.exception.emit(ex)
@@ -319,13 +319,13 @@ class WMSMapFetcher(QtCore.QObject):
         """
         Retrieves a WMS map from a server or reads it from a cache if allowed
         """
-        logging.debug("MapPrefetcher %s %s.", kwargs["time"], kwargs["level"])
+        LOGGER.debug("MapPrefetcher %s %s.", kwargs["time"], kwargs["level"])
 
         if use_cache and os.path.exists(md5_filename):
             if ".png" in md5_filename:
                 img = Image.open(md5_filename)
                 img.load()
-                logging.debug("MapPrefetcher - found image cache")
+                LOGGER.debug("MapPrefetcher - found image cache")
             else:
                 with open(md5_filename, "r") as cache:
                     return etree.fromstring(cache.read())
@@ -347,7 +347,7 @@ class WMSMapFetcher(QtCore.QObject):
                 img.save(md5_filename, transparency=img.info["transparency"])
             else:
                 img.save(md5_filename)
-            logging.debug("MapPrefetcher %s - saved filed: %s.", self, md5_filename)
+            LOGGER.debug("MapPrefetcher %s - saved filed: %s.", self, md5_filename)
         return img.convert("RGBA")
 
     def fetch_legend(self, urlstr=None, use_cache=True, md5_filename=None):
@@ -360,7 +360,7 @@ class WMSMapFetcher(QtCore.QObject):
         if use_cache and os.path.exists(md5_filename):
             legend_img = Image.open(md5_filename)
             legend_img.load()
-            logging.debug("MapPrefetcher - found legend cache")
+            LOGGER.debug("MapPrefetcher - found legend cache")
         else:
             if not self.long_request:
                 self.started_request.emit()
@@ -368,7 +368,7 @@ class WMSMapFetcher(QtCore.QObject):
             # This StringIO object can then be passed as a file substitute to
             # Image.open(). See
             #    http://www.pythonware.com/library/pil/handbook/image.htm
-            logging.debug("Retrieving legend from '%s'", urlstr)
+            LOGGER.debug("Retrieving legend from '%s'", urlstr)
             urlobject = requests.get(urlstr, timeout=(2, 10))
             image_io = io.BytesIO(urlobject.content)
             try:
@@ -378,14 +378,14 @@ class WMSMapFetcher(QtCore.QObject):
                 # as present with http://geoservices.knmi.nl/cgi-bin/HARM_N25.cgi
                 # it is deemed preferential to display the WMS map and forget about the
                 # legend than not displaying anything.
-                logging.error("Wildecard Exception %s - %s.", type(ex), ex)
+                LOGGER.error("Wildecard Exception %s - %s.", type(ex), ex)
                 return None
             legend_img = legend_img_raw.crop(legend_img_raw.getbbox())
             # Store the retrieved image in the cache, if enabled.
             try:
                 legend_img.save(md5_filename, transparency=0)
             except Exception as ex:
-                logging.debug("Wildecard Exception %s - %s.", type(ex), ex)
+                LOGGER.debug("Wildecard Exception %s - %s.", type(ex), ex)
                 legend_img.save(md5_filename)
         return legend_img.convert("RGBA")
 
@@ -471,12 +471,12 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
         # Check for WMS image cache directory, create if necessary.
         if wms_cache is not None:
             self.wms_cache = os.path.join(wms_cache, "")
-            logging.debug("checking for WMS image cache at %s ...", self.wms_cache)
+            LOGGER.debug("checking for WMS image cache at %s ...", self.wms_cache)
             if not os.path.exists(self.wms_cache):
-                logging.debug("  created new image cache directory.")
+                LOGGER.debug("  created new image cache directory.")
                 os.makedirs(self.wms_cache)
             else:
-                logging.debug("  found.")
+                LOGGER.debug("  found.")
             # Service the cache (delete files that are too old, remove oldest
             # files if cache is too large).
             self.service_cache()
@@ -709,10 +709,10 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
         if crs and \
            self.parent() is not None and \
            self.parent().parent() is not None:
-            logging.debug("Layer offers '%s' projections.", crs)
+            LOGGER.debug("Layer offers '%s' projections.", crs)
             extra = [_code for _code in crs if _code.startswith("EPSG")]
             extra = [_code for _code in sorted(extra) if _code[5:] in basemap.epsg_dict]
-            logging.debug("Selected '%s' for Combobox.", extra)
+            LOGGER.debug("Selected '%s' for Combobox.", extra)
             self.parent().parent().update_predefined_maps(extra)
 
     def style_changed_now(self, style):
@@ -772,7 +772,7 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
                         self.multilayers.cbWMS_URL.setCurrentIndex(count)
                         found = True
                 if not found:
-                    logging.debug("inserting URL: %s", base_url)
+                    LOGGER.debug("inserting URL: %s", base_url)
                     add_wms_urls(self.multilayers.cbWMS_URL, [base_url])
                     self.multilayers.cbWMS_URL.setEditText(base_url)
                     save_settings_qsettings('wms', {'recent_wms_url': base_url})
@@ -785,7 +785,7 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
             try:
                 raise e
             except owslib.util.ServiceException as ex:
-                logging.error("ERROR: %s %s", type(ex), ex)
+                LOGGER.error("ERROR: %s %s", type(ex), ex)
                 if str(ex).startswith("401") or str(ex).find("Error 401") >= 0 or str(ex).find(
                         "Unauthorized") >= 0:
                     # Catch the "401 Unauthorized" error if one has been
@@ -807,7 +807,7 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
                             save_password_to_keyring(service_name=base_url,
                                                      username=auth_username, password=auth_password)
                         except (NoKeyringError, PasswordSetError, InitError) as ex:
-                            logging.warning("Can't use Keyring on your system: %s" % ex)
+                            LOGGER.warning("Can't use Keyring on your system: %s" % ex)
                         http_auth[base_url] = auth_username
                         data_to_save_in_config_file = {
                             "MSS_auth": http_auth
@@ -827,14 +827,14 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
                         self.cpdlg.close()
                         return
                 else:
-                    logging.error("cannot load capabilities document.. "
+                    LOGGER.error("cannot load capabilities document.. "
                                   "no layers can be used in this view.")
                     QtWidgets.QMessageBox.critical(
                         self.multilayers, self.tr("Web Map Service"),
                         self.tr(f"ERROR: We cannot load the capability document!\n\n{type(ex)}\n{ex}"))
                     self.cpdlg.close()
             except Exception as ex:
-                logging.error("cannot load capabilities document.. "
+                LOGGER.error("cannot load capabilities document.. "
                               "no layers can be used in this view.")
                 QtWidgets.QMessageBox.critical(
                     self.multilayers, self.tr("Web Map Service"),
@@ -844,7 +844,7 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
         try:
             str(base_url)
         except UnicodeEncodeError:
-            logging.error("got a unicode url?!: '%s'", base_url)
+            LOGGER.error("got a unicode url?!: '%s'", base_url)
             QtWidgets.QMessageBox.critical(self.multilayers, self.tr("Web Map Service"),
                                            self.tr("ERROR: We cannot parse unicode URLs!"))
             self.cpdlg.close()
@@ -860,28 +860,28 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
 
     @QtCore.pyqtSlot(Exception)
     def display_exception(self, ex):
-        logging.error("ERROR: %s %s", type(ex), ex)
-        logging.debug("%s", traceback.format_exc())
+        LOGGER.error("ERROR: %s %s", type(ex), ex)
+        LOGGER.debug("%s", traceback.format_exc())
         QtWidgets.QMessageBox.critical(
             self, self.tr("Web Map Service"), self.tr(f"ERROR:\n{type(ex)}\n{ex}"))
 
     @QtCore.pyqtSlot()
     def display_progress_dialog(self):
-        logging.debug("showing progress dialog")
+        LOGGER.debug("showing progress dialog")
         self.pdlg.reset()
         self.pdlg.setValue(5)
         self.pdlg.setModal(True)
         self.pdlg.show()
 
     def display_capabilities_dialog(self):
-        logging.debug("showing capabilities dialog")
+        LOGGER.debug("showing capabilities dialog")
         self.cpdlg.reset()
         self.cpdlg.setValue(1)
         self.cpdlg.setModal(True)
         self.cpdlg.show()
 
     def stop_capabilities_retrieval(self):
-        logging.debug("stopping capabilities retrieval")
+        LOGGER.debug("stopping capabilities retrieval")
         try:
             self.capabilities_worker.quit()
             self.capabilities_worker.disconnect()
@@ -889,9 +889,9 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
             pass
 
     def clear_map(self):
-        logging.debug("clear figure")
+        LOGGER.debug("clear figure")
         self.view.plotter.clear_figure()
-        logging.debug("enabling checkboxes in map-options if any")
+        LOGGER.debug("enabling checkboxes in map-options if any")
         self.signal_enable_cbs.emit()
 
     def select_layer_and_style(self, layer_list, layer_name, style_name):
@@ -951,7 +951,7 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
 
             url = url.replace("?service=WMS", "").replace("&service=WMS", "") \
                 .replace("?request=GetCapabilities", "").replace("&request=GetCapabilities", "")
-            logging.debug("requesting capabilities from %s", url)
+            LOGGER.debug("requesting capabilities from %s", url)
             self.initialise_wms(url, None, level=level)
 
         def on_failure(e):
@@ -962,7 +962,7 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
                     requests.exceptions.InvalidURL,
                     requests.exceptions.InvalidSchema,
                     requests.exceptions.MissingSchema) as ex:
-                logging.error("Cannot load capabilities document.\n"
+                LOGGER.error("Cannot load capabilities document.\n"
                               "No layers can be used in this view.")
                 QtWidgets.QMessageBox.critical(
                     self.multilayers, self.tr("Web Map Service"),
@@ -985,7 +985,7 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
             elif self.is_layer_aligned(layer):
                 cb_string = f"{layer.title} | {layer.name}"
                 filtered_layers.add(cb_string)
-        logging.debug("discovered %i layers that can be used in this view",
+        LOGGER.debug("discovered %i layers that can be used in this view",
                       len(filtered_layers))
         filtered_layers = sorted(filtered_layers)
         selected = self.multilayers.current_layer.text(0) if self.multilayers.current_layer else None
@@ -1030,7 +1030,7 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
         """Open a WMSCapabilitiesBrowser dialog showing the capabilities
            document.
         """
-        logging.debug("Opening WMS capabilities browser..")
+        LOGGER.debug("Opening WMS capabilities browser..")
         wms = self.multilayers.layers[self.multilayers.cbWMS_URL.currentText()]["wms"]
         if wms is not None:
             wmsbrws = wms_capabilities.WMSCapabilitiesBrowser(
@@ -1081,8 +1081,8 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
                     raise ValueError("value has incorrect number of entries.")
 
             except Exception as ex:
-                logging.debug("Wildcard Exception %s - %s.", type(ex), ex)
-                logging.error("Can't understand time string '%s'. Please check the implementation.", time_item)
+                LOGGER.debug("Wildcard Exception %s - %s.", type(ex), ex)
+                LOGGER.error("Can't understand time string '%s'. Please check the implementation.", time_item)
         return times
 
     def disable_ui(self):
@@ -1161,10 +1161,10 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
         if crs and \
            self.parent() is not None and \
            self.parent().parent() is not None:
-            logging.debug("Layer offers '%s' projections.", crs)
+            LOGGER.debug("Layer offers '%s' projections.", crs)
             extra = [_code for _code in crs if _code.startswith("EPSG")]
             extra = [_code for _code in sorted(extra) if _code[5:] in basemap.epsg_dict]
-            logging.debug("Selected '%s' for Combobox.", extra)
+            LOGGER.debug("Selected '%s' for Combobox.", extra)
             self.parent().parent().update_predefined_maps(extra)
         if update_level:
             for i in range(self.cbLevel.count()):
@@ -1189,15 +1189,15 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
         try:
             return 60 * int(timestep_string.split(" min")[0])
         except ValueError as error:
-            logging.debug("ValueError Exception %s", error)
+            LOGGER.debug("ValueError Exception %s", error)
         try:
             return 3600 * int(timestep_string.split(" hour")[0])
         except ValueError as error:
-            logging.debug("ValueError Exception %s", error)
+            LOGGER.debug("ValueError Exception %s", error)
         try:
             return 86400 * int(timestep_string.split(" days")[0])
         except ValueError as error:
-            logging.debug("ValueError Exception %s", error)
+            LOGGER.debug("ValueError Exception %s", error)
             raise ValueError(f"cannot convert '{timestep_string}' to seconds: wrong format.")
 
     def init_time_back_click(self):
@@ -1541,12 +1541,12 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
         init_time = layer.get_itime()
         valid_time = layer.get_vtime()
 
-        logging.debug("fetching layer '%s'; style '%s', width %d, height %d",
+        LOGGER.debug("fetching layer '%s'; style '%s', width %d, height %d",
                       layer, style, width, height)
-        logging.debug("crs=%s, path=%s", crs, path_string)
-        logging.debug("init_time=%s, valid_time=%s", init_time, valid_time)
-        logging.debug("level=%s", level)
-        logging.debug("transparent=%s", transparent)
+        LOGGER.debug("crs=%s, path=%s", crs, path_string)
+        LOGGER.debug("init_time=%s, valid_time=%s", init_time, valid_time)
+        LOGGER.debug("level=%s", level)
+        LOGGER.debug("transparent=%s", transparent)
 
         try:
             # Call the self.wms.getmap() method in a separate thread to keep
@@ -1586,7 +1586,7 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
                         try:
                             value = int(prefetch_config[_x])
                         except ValueError as ex:
-                            logging.error("ERROR: %s %s", type(ex), ex)
+                            LOGGER.error("ERROR: %s %s", type(ex), ex)
                             value = 0
                         prefetch_config[_x] = max(0, value)
                     else:
@@ -1637,7 +1637,7 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
         """Prototypical stub for getMap() function. Needs to be reimplemented
            in derived classes.
         """
-        logging.error("getMap not implemented in base class.")
+        LOGGER.error("getMap not implemented in base class.")
 
     def after_redraw(self):
         """Event handler that a canvas can call after it has been redrawn.
@@ -1658,25 +1658,25 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
             # Delete all files in cache.
             if self.wms_cache is not None:
                 cached_files = os.listdir(self.wms_cache)
-                logging.debug("clearing cache; deleting %i files...", len(cached_files))
+                LOGGER.debug("clearing cache; deleting %i files...", len(cached_files))
                 try:
                     for f in cached_files:
                         os.remove(os.path.join(self.wms_cache, f))
                 except (IOError, OSError) as ex:
                     msg = f"ERROR: Cannot delete file '{f}'. ({type(ex)}: {ex})"
-                    logging.error(msg)
+                    LOGGER.error(msg)
                     QtWidgets.QMessageBox.critical(self, self.tr("Web Map Service"), self.tr(msg))
                 else:
-                    logging.debug("cache has been cleared.")
+                    LOGGER.debug("cache has been cleared.")
             else:
-                logging.debug("no cache exists that can be cleared.")
+                LOGGER.debug("no cache exists that can be cleared.")
 
     def service_cache(self):
         """Service the cache: Remove all files older than the maximum file
            age specified in msui_settings, and remove the oldest files if the
            maximum cache size has been reached.
         """
-        logging.debug("servicing cache...")
+        LOGGER.debug("servicing cache...")
 
         # Create a list of all files in the cache.
         files = [os.path.join(self.wms_cache, f) for f in os.listdir(self.wms_cache)]
@@ -1705,9 +1705,9 @@ class WMSControlWidget(QtWidgets.QWidget, ui.Ui_WMSDockWidget):
                     removed_files += 1
         except (IOError, OSError) as ex:
             msg = f"ERROR: Cannot delete file '{f}'. ({type(ex)}: {ex})"
-            logging.error(msg)
+            LOGGER.error(msg)
             QtWidgets.QMessageBox.critical(self, self.tr("Web Map Service"), self.tr(msg))
-        logging.debug("cache has been cleaned (%i files removed).", removed_files)
+        LOGGER.debug("cache has been cleaned (%i files removed).", removed_files)
 
     def squash_multiple_images(self, imgs):
         """

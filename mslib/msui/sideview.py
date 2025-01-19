@@ -34,7 +34,7 @@ from mslib.msui.qt5 import ui_sideview_options as ui_opt
 from mslib.msui.viewwindows import MSUIMplViewWindow
 from mslib.msui import wms_control as wms
 from mslib.msui.icons import icons
-from mslib.utils import thermolib
+from mslib.utils import thermolib, LOGGER
 from mslib.utils.config import config_loader
 from mslib.utils.units import units, convert_to
 from mslib.msui import autoplot_dockwidget as apd
@@ -211,7 +211,7 @@ class MSUI_SV_OptionsDialog(QtWidgets.QDialog, ui_opt.Ui_SideViewOptionsDialog):
         try:
             flightlevel = int(item.text())
         except Exception as ex:
-            logging.debug("Wildecard Exception %s - %s.", type(ex), ex)
+            LOGGER.debug("Wildecard Exception %s - %s.", type(ex), ex)
             flightlevel = 0
         if flightlevel < 0:
             flightlevel = 0

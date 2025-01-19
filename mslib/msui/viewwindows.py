@@ -32,6 +32,7 @@ from abc import abstractmethod
 
 from PyQt5 import QtCore, QtWidgets
 from mslib.utils.config import save_settings_qsettings
+from mslib.utils import LOGGER
 
 
 class MSUIViewWindow(QtWidgets.QMainWindow):
@@ -260,7 +261,7 @@ class MSUIMplViewWindow(MSUIViewWindow):
 
     def __init__(self, parent=None, model=None, _id=None):
         super().__init__(parent, model, _id)
-        logging.debug(_id)
+        LOGGER.debug(_id)
         self.mpl = None
 
     def setFlightTrackModel(self, model):

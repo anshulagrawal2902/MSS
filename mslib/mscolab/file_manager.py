@@ -39,6 +39,7 @@ from sqlalchemy.exc import IntegrityError
 from mslib.utils.verify_waypoint_data import verify_waypoint_data
 from mslib.mscolab.models import db, Operation, Permission, User, Change, Message
 from mslib.mscolab.conf import mscolab_settings
+from mslib.utils import LOGGER
 
 
 class FileManager:
@@ -74,7 +75,7 @@ class FileManager:
             return False
         # set codes on these later
         if path.find("/") != -1 or path.find("\\") != -1 or (" " in path):
-            logging.debug("malicious request: %s", user)
+            LOGGER.debug("malicious request: %s", user)
             return False
         proj_available = Operation.query.filter_by(path=path).first()
         if proj_available is not None:
@@ -269,7 +270,7 @@ class FileManager:
         with fs.open_fs(upload_folder) as profile_fs:
             if profile_fs.exists(image_to_be_deleted):
                 profile_fs.remove(image_to_be_deleted)
-                logging.debug(f"Successfully deleted image: {image_to_be_deleted}")
+                LOGGER.debug(f"Successfully deleted image: {image_to_be_deleted}")
 
     def upload_file(self, file, subfolder=None, identifier=None, include_prefix=False):
         """
@@ -306,7 +307,7 @@ class FileManager:
             else:
                 static_file_path = fs.path.relativefrom(upload_folder, fs.path.join(subfolder_path, file_name))
 
-            logging.debug(f'Relative Path: {static_file_path}')
+            LOGGER.debug(f'Relative Path: {static_file_path}')
             return static_file_path
 
     def save_user_profile_image(self, user_id, image_file):
@@ -337,7 +338,7 @@ class FileManager:
         operation = Operation.query.filter_by(id=op_id).first()
         if attribute == "path":
             if value.find("/") != -1 or value.find("\\") != -1 or (" " in value):
-                logging.debug("malicious request: %s", user)
+                LOGGER.debug("malicious request: %s", user)
                 return False
             with fs.open_fs(self.data_dir) as data:
                 if data.exists(value):
@@ -549,7 +550,7 @@ class FileManager:
                 db.session.commit()
                 return True
             except Exception as ex:
-                logging.debug(ex)
+                LOGGER.debug(ex)
                 return False
 
     def fetch_users_without_permission(self, op_id, u_id):

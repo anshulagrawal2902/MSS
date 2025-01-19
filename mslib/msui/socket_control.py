@@ -36,6 +36,7 @@ from mslib.msui.mscolab_exceptions import MSColabConnectionError
 from mslib.utils.config import MSUIDefaultConfig as mss_default
 from mslib.utils.verify_user_token import verify_user_token
 from mslib.utils.config import config_loader
+from mslib.utils import LOGGER
 
 
 class ConnectionManager(QtCore.QObject):
@@ -60,10 +61,10 @@ class ConnectionManager(QtCore.QObject):
         self.user = user
         self.mscolab_server_url = mscolab_server_url
         if token is not None:
-            logging.getLogger("engineio.client").addFilter(filter=lambda record: token not in record.getMessage())
+            LOGGER.getLogger("engineio.client").addFilter(filter=lambda record: token not in record.getMessage())
         self.sio = socketio.Client(reconnection_attempts=5)
         self.sio.connect(self.mscolab_server_url)
-        logging.debug("Transport Layer: %s", self.sio.transport())
+        LOGGER.debug("Transport Layer: %s", self.sio.transport())
 
         self.sio.on('file-changed', handler=self.handle_file_change)
         # on chat message receive
@@ -134,7 +135,7 @@ class ConnectionManager(QtCore.QObject):
 
     def handle_incoming_message(self, message):
         # raise signal to render to view
-        logging.debug(message)
+        LOGGER.debug(message)
         # emit signal
         self.signal_message_receive.emit(message)
 
@@ -159,14 +160,14 @@ class ConnectionManager(QtCore.QObject):
         self.signal_operation_list_updated.emit()
 
     def handle_new_operation(self, op_id):
-        logging.debug("adding user to new operation")
+        LOGGER.debug("adding user to new operation")
         self.sio.emit('add-user-to-operation', {
                       "op_id": op_id,
                       "token": self.token})
 
     def send_message(self, message_text, op_id, reply_id):
         if verify_user_token(self.mscolab_server_url, self.token):
-            logging.debug("sending message")
+            LOGGER.debug("sending message")
             self.sio.emit('chat-message', {
                           "op_id": op_id,
                           "token": self.token,
@@ -206,7 +207,7 @@ class ConnectionManager(QtCore.QObject):
     def save_file(self, token, op_id, content, comment=None, messageText=""):
         # ToDo refactor API
         if verify_user_token(self.mscolab_server_url, self.token):
-            logging.debug("saving file")
+            LOGGER.debug("saving file")
             self.sio.emit('file-save', {
                           "op_id": op_id,
                           "token": self.token,

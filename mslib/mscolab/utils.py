@@ -28,6 +28,7 @@ import os
 import logging
 
 from mslib.mscolab.conf import mscolab_settings
+from mslib.utils import LOGGER
 
 
 def get_recent_op_id(fm, user):
@@ -72,9 +73,9 @@ def os_fs_create_dir(directory_path):
         try:
             _ = fs.open_fs(directory_path)
         except fs.errors.CreateFailed:
-            logging.error('Make sure that the FS url "%s" exists', directory_path)
+            LOGGER.error('Make sure that the FS url "%s" exists', directory_path)
         except fs.opener.errors.UnsupportedProtocol:
-            logging.error('FS url "%s" not supported', directory_path)
+            LOGGER.error('FS url "%s" not supported', directory_path)
     else:
         _dir = os.path.expanduser(directory_path)
         if not os.path.exists(_dir):

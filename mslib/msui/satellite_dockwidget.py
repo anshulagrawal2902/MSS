@@ -37,6 +37,7 @@ from mslib.msui.qt5 import ui_satellite_dockwidget as ui
 from PyQt5 import QtWidgets
 from mslib.utils.config import save_settings_qsettings, load_settings_qsettings
 from fs import open_fs
+from mslib.utils import LOGGER
 
 
 def read_nasa_satellite_prediction(fname):
@@ -150,16 +151,16 @@ class SatelliteControlWidget(QtWidgets.QWidget, ui.Ui_SatelliteDockWidget):
         available track segments.
         """
         filename = self.leFile.text()
-        logging.debug("loading satellite overpasses in file '%s'", filename)
+        LOGGER.debug("loading satellite overpasses in file '%s'", filename)
 
         try:
             overpass_segments = read_nasa_satellite_prediction(filename)
         except (IOError, OSError, ValueError, fs.errors.FileExpected) as ex:
-            logging.error("Problem accessing '%s' file", filename)
+            LOGGER.error("Problem accessing '%s' file", filename)
             QtWidgets.QMessageBox.critical(self, self.tr("Satellite Overpass Tool"),
                                            self.tr(f"ERROR:\n{type(ex)}\n{ex}"))
         else:
-            logging.debug("read %i segments", len(overpass_segments))
+            LOGGER.debug("read %i segments", len(overpass_segments))
 
             self.cbSatelliteOverpasses.clear()
             items = [f"{seg['utc'][0]} to {seg['utc'][-1]}"
@@ -174,7 +175,7 @@ class SatelliteControlWidget(QtWidgets.QWidget, ui.Ui_SatelliteDockWidget):
         """
         """
         index -= 2
-        logging.debug("plotting satellite overpass #%i", index)
+        LOGGER.debug("plotting satellite overpass #%i", index)
         segments = []
         if 0 <= index < len(self.overpass_segments):
             segments = [self.overpass_segments[index]]

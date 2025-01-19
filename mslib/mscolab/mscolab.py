@@ -44,17 +44,17 @@ from mslib.mscolab.seed import seed_data, add_user, add_all_users_default_operat
     add_all_users_to_all_operations, delete_user
 from mslib.mscolab.server import APP
 from mslib.mscolab.utils import create_files
-from mslib.utils import setup_logging
+from mslib.utils import setup_logging, LOGGER
 
 
 def handle_start(args=None):
     from mslib.mscolab.server import APP, sockio, cm, fm, start_server
     if args is not None:
-        setup_logging(levelno = args.loglevel, logfile= args.logfile)
-    logging.info("MSS Version: %s", __version__)
-    logging.info("Python Version: %s", sys.version)
-    logging.info("Platform: %s (%s)", platform.platform(), platform.architecture())
-    logging.info("Launching MSColab Server")
+        setup_logging(levelno=args.loglevel, logfile=args.logfile)
+    LOGGER.info("MSS Version: %s", __version__)
+    LOGGER.info("Python Version: %s", sys.version)
+    LOGGER.info("Platform: %s (%s)", platform.platform(), platform.architecture())
+    LOGGER.info("Launching MSColab Server")
     start_server(APP, sockio, cm, fm)
 
 
@@ -108,7 +108,7 @@ def handle_mscolab_certificate_init():
                "/CN=localhost", "-out", os.path.join(mscolab_settings.SSO_DIR,
                                                      "crt_mscolab.crt")]
         subprocess.run(cmd, check=True)
-        logging.info("generated CRTs for the mscolab server.")
+        LOGGER.info("generated CRTs for the mscolab server.")
         return True
     except subprocess.CalledProcessError as error:
         print(f"Error while generating CRTs for the mscolab server: {error}")
@@ -124,7 +124,7 @@ def handle_local_idp_certificate_init():
                "-nodes", "-x509", "-days", "365", "-batch", "-subj",
                "/CN=localhost", "-out", os.path.join(mscolab_settings.SSO_DIR, "crt_local_idp.crt")]
         subprocess.run(cmd, check=True)
-        logging.info("generated CRTs for the local identity provider")
+        LOGGER.info("generated CRTs for the local identity provider")
         return True
     except subprocess.CalledProcessError as error:
         print(f"Error while generated CRTs for the local identity provider: {error}")
@@ -282,7 +282,7 @@ def handle_mscolab_metadata_init(repo_exists):
                     "-o", os.path.join(mscolab_settings.SSO_DIR, "metadata_sp.xml")]
         subprocess.run(cmd_curl, check=True)
         process.terminate()
-        logging.info('mscolab metadata file generated succesfully')
+        LOGGER.info('mscolab metadata file generated succesfully')
         return True
 
     except subprocess.CalledProcessError as error:
@@ -309,7 +309,7 @@ def handle_local_idp_metadata_init(repo_exists):
         with open(os.path.join(mscolab_settings.SSO_DIR, "idp.xml"),
                   "w", encoding="utf-8") as output_file:
             subprocess.run(cmd, stdout=output_file, check=True)
-        logging.info("idp metadata file generated successfully")
+        LOGGER.info("idp metadata file generated successfully")
         return True
     except subprocess.CalledProcessError as error:
         # Delete the idp.xml file when the subprocess fails

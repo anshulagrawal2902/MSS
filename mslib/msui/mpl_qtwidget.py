@@ -201,7 +201,7 @@ class TopViewPlotter(ViewPlotter):
             try:
                 self.map._draw_auto_graticule(self.tov_als)
             except Exception as ex:
-                logging.error("ERROR: cannot plot graticule (message: %s - '%s')", type(ex), ex)
+                mpl_logger.error("ERROR: cannot plot graticule (message: %s - '%s')", type(ex), ex)
         else:
             self.map.set_graticule_visible(False)
         self.ax.set_autoscale_on(False)
@@ -228,7 +228,7 @@ class TopViewPlotter(ViewPlotter):
         return bbox
 
     def clear_figure(self):
-        logging.debug("Removing image")
+        mpl_logger.debug("Removing image")
         if self.map.image is not None:
             self.map.image.remove()
             self.map.image = None
@@ -299,7 +299,7 @@ class TopViewPlotter(ViewPlotter):
     def draw_image(self, img):
         """Draw the image img on the current plot.
         """
-        logging.debug("plotting image..")
+        mpl_logger.debug("plotting image..")
         self.wms_image = self.map.imshow(img, interpolation="nearest", origin=PIL_IMAGE_ORIGIN)
         # NOTE: imshow always draws the images to the lowest z-level of the
         # plot.
@@ -311,7 +311,7 @@ class TopViewPlotter(ViewPlotter):
         # anyhow? At least we need to remove filled continents here.
         # self.map.set_fillcontinents_visible(False)
         # ** UPDATE 2011/01/14 ** seems to work with version 1.0!
-        logging.debug("done.")
+        mpl_logger.debug("done.")
 
     def draw_legend(self, img):
         """Draw the legend graphics img on the current plot.
@@ -320,7 +320,7 @@ class TopViewPlotter(ViewPlotter):
         # If the method is called with a "None" image, the current legend
         # graphic should be removed (if one exists).
         if self.legimg is not None:
-            logging.debug("removing image %s", self.legimg)
+            mpl_logger.debug("removing image %s", self.legimg)
             self.legimg.remove()
             self.legimg = None
 
@@ -532,7 +532,7 @@ class SideViewPlotter(ViewPlotter):
            a vertical section image if one exists, as it is invalid after
            a path change.
         """
-        logging.debug("redrawing x-axis")
+        mpl_logger.debug("redrawing x-axis")
 
         # Re-label x-axis.
         self.ax.set_xlim(0, len(lats) - 1)
@@ -561,7 +561,7 @@ class SideViewPlotter(ViewPlotter):
             try:
                 line.remove()
             except ValueError as e:
-                logging.debug("Vertical line was somehow already removed:\n%s", e)
+                mpl_logger.debug("Vertical line was somehow already removed:\n%s", e)
         self.vertical_lines = []
 
         # Add vertical lines
@@ -595,7 +595,7 @@ class SideViewPlotter(ViewPlotter):
         return bbox
 
     def clear_figure(self):
-        logging.debug("path of side view has changed.. removing invalidated "
+        mpl_logger.debug("path of side view has changed.. removing invalidated "
                       "image (if existent) and redrawing.")
         if self.image is not None:
             self.image.remove()
@@ -610,9 +610,9 @@ class SideViewPlotter(ViewPlotter):
         below the axes that display the flight profile. This is necessary
         because imshow() does not work with logarithmic axes.
         """
-        logging.debug("plotting vertical section image..")
+        mpl_logger.debug("plotting vertical section image..")
         ix, iy = img.size
-        logging.debug("  image size is %dx%d px, format is '%s'", ix, iy, img.format)
+        mpl_logger.debug("  image size is %dx%d px, format is '%s'", ix, iy, img.format)
 
         # If an image is currently displayed, remove it from the plot.
         if self.image is not None:
@@ -624,7 +624,7 @@ class SideViewPlotter(ViewPlotter):
         self.imgax.set_xlim(0, ix - 1)
         self.imgax.set_ylim(iy - 1, 0)
         self.ax.figure.canvas.draw()
-        logging.debug("done.")
+        mpl_logger.debug("done.")
 
     def update_vertical_extent_from_settings(self, init=False):
         """ Checks for current units of axis and convert the upper and lower limit
@@ -688,7 +688,7 @@ class LinearViewPlotter(ViewPlotter):
         self.fig.subplots_adjust(left=0.08, right=0.96, top=0.9, bottom=0.14)
 
     def clear_figure(self):
-        logging.debug("path of linear view has changed.. removing invalidated plots")
+        mpl_logger.debug("path of linear view has changed.. removing invalidated plots")
         self.fig.clf()
         self.ax = self.fig.add_subplot(111, zorder=99)
         self.ax.figure.patch.set_visible(False)
@@ -711,7 +711,7 @@ class LinearViewPlotter(ViewPlotter):
             try:
                 line.remove()
             except ValueError as e:
-                logging.debug("Vertical line was somehow already removed:\n%s", e)
+                mpl_logger.debug("Vertical line was somehow already removed:\n%s", e)
         self.vertical_lines = []
 
     def draw_vertical_lines(self, highlight, lats, lons):
@@ -729,7 +729,7 @@ class LinearViewPlotter(ViewPlotter):
 
     def draw_legend(self, img):
         if img is not None:
-            logging.error("Legends not supported in LinearView mode!")
+            mpl_logger.error("Legends not supported in LinearView mode!")
             raise NotImplementedError
 
     def draw_image(self, xmls, colors=None, scales=None):
@@ -1096,7 +1096,7 @@ class NavigationToolbar(NavigationToolbar2QT):
                 try:
                     lat, lon = self.canvas.waypoints_interactor.get_lat_lon(event)
                 except (ValueError, OverflowError) as ex:
-                    logging.error("%s", ex)
+                    mpl_logger.error("%s", ex)
                 else:
                     s = f"lat={lat:6.2f}, lon={lon:7.2f}"
                     artists = [a for a in event.inaxes._mouseover_set
@@ -1383,7 +1383,7 @@ class MplSideViewCanvas(MplCanvas):
 
     def draw_legend(self, img):
         if img is not None:
-            logging.error("Legends not supported in SideView mode!")
+            mpl_logger.error("Legends not supported in SideView mode!")
             raise NotImplementedError
 
     def draw_image(self, img):
@@ -1487,7 +1487,7 @@ class MplLinearViewCanvas(MplCanvas):
 
     def draw_legend(self, img):
         if img is not None:
-            logging.error("Legends not supported in LinearView mode!")
+            mpl_logger.error("Legends not supported in LinearView mode!")
             raise NotImplementedError
 
     def draw_image(self, xmls, colors=None, scales=None):
@@ -1500,7 +1500,7 @@ class MplLinearViewCanvas(MplCanvas):
         if self.waypoints_interactor is not None:
             lats = self.waypoints_interactor.plotter.path.ilats
             lons = self.waypoints_interactor.plotter.path.ilons
-            logging.debug("redrawing x-axis")
+            mpl_logger.debug("redrawing x-axis")
 
             self.plotter.redraw_xaxis(lats, lons)
 
@@ -1584,7 +1584,7 @@ class MplTopViewCanvas(MplCanvas):
                     show_marker=settings["draw_marker"])
                 self.set_settings(None)
             except IOError as err:
-                logging.error("%s" % err)
+                mpl_logger.error("%s" % err)
 
     def redraw_map(self, kwargs_update=None):
         """Redraw map canvas.
@@ -1602,7 +1602,7 @@ class MplTopViewCanvas(MplCanvas):
         self.pdlg.show()
         QtWidgets.QApplication.processEvents()
 
-        logging.debug("redrawing map")
+        mpl_logger.debug("redrawing map")
 
         # 1) STORE COORDINATES OF NON-MAP OBJECTS IN LAT/LON.
 
@@ -1637,7 +1637,7 @@ class MplTopViewCanvas(MplCanvas):
         self.pdlg.setValue(10)
         QtWidgets.QApplication.processEvents()
 
-        logging.debug("finished redrawing map")
+        mpl_logger.debug("finished redrawing map")
         self.pdlg.close()
 
         # Emit signal so other parts of the module can react to a redraw event.
@@ -1656,7 +1656,7 @@ class MplTopViewCanvas(MplCanvas):
         return self.plotter.getBBOX()
 
     def clear_figure(self):
-        logging.debug("Removing image")
+        mpl_logger.debug("Removing image")
         self.plotter.clear_figure()
 
     def draw_image(self, img):

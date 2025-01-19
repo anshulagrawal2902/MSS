@@ -37,6 +37,7 @@ from mslib.msui.qt5 import ui_kmloverlay_dockwidget as ui
 from PyQt5 import QtGui, QtWidgets, QtCore
 from mslib.utils.config import save_settings_qsettings, load_settings_qsettings
 from mslib.utils.coordinate import normalize_longitude
+from mslib.utils import LOGGER
 
 
 class KMLPatch:
@@ -190,14 +191,14 @@ class KMLPatch:
             "color": str(getattr(style, "color", "")),
             "linewidth": float(getattr(style, "width", linewidth))
         }
-        logging.debug("color before %s", result["color"])
+        LOGGER.debug("color before %s", result["color"])
         if len(result["color"]) == 7 and result["color"][0] == "#":
             result["color"] = [(int(result["color"][i:i + 2], 16) / 255.) for i in range(1, 8, 2)]
         elif len(result["color"]) == 8:
             result["color"] = [(int(result["color"][i:i + 2], 16) / 255.) for i in range(0, 8, 2)][::-1]
         else:
             result["color"] = color
-        logging.debug("color after %s", result["color"])
+        LOGGER.debug("color after %s", result["color"])
         return result
 
     def parse_styles(self, kml_doc):
@@ -219,7 +220,7 @@ class KMLPatch:
     def parse_local_styles(self, placemark, default_styles):
         # exterior_style : <Style> INSIDE placemarks
         # interior_style : within <Style>
-        logging.debug("styles before %s", default_styles)
+        LOGGER.debug("styles before %s", default_styles)
         local_styles = copy.deepcopy(default_styles)
         for exterior_style in placemark.styles():
             interior_style = exterior_style.styles()
@@ -322,7 +323,7 @@ class KMLOverlayControlWidget(QtWidgets.QWidget, ui.Ui_KMLOverlayDockWidget):
                     self.create_list_item(fn)
                 else:
                     delete_files.append(fn)  # add non-existent files to list
-                    logging.info("'%s' does not exist in the directory anymore.", fn)
+                    LOGGER.info("'%s' does not exist in the directory anymore.", fn)
             for fn in delete_files:
                 del self.dict_files[fn]  # remove non-existent files from dictionary
             self.load_file()
@@ -490,7 +491,7 @@ class KMLOverlayControlWidget(QtWidgets.QWidget, ui.Ui_KMLOverlayDockWidget):
                 self.directory_location = text  # Saves location of directory to open
                 self.create_list_item(text)
             else:
-                logging.info("%s file already added", text)
+                LOGGER.info("%s file already added", text)
         self.labelStatusBar.setText("Status: KML Files added")
 
     def create_list_item(self, text):
@@ -569,14 +570,14 @@ class KMLOverlayControlWidget(QtWidgets.QWidget, ui.Ui_KMLOverlayDockWidget):
 
                 except (AttributeError, IOError, TypeError, et.XMLSyntaxError, et.XMLSchemaError,
                         et.XMLSchemaParseError, et.XMLSchemaValidateError) as ex:  # catches KML Syntax Errors
-                    logging.error("KML Overlay - %s: %s", type(ex), ex)
+                    LOGGER.error("KML Overlay - %s: %s", type(ex), ex)
                     self.labelStatusBar.setText(str(self.listWidget.item(index).text()) +
                                                 " is either an invalid KML File or has an error.")
                     del self.dict_files[self.listWidget.item(index).text()]  # del the checked files from dictionary
                     self.listWidget.takeItem(index)  # remove file item from ListWidget
                     QtWidgets.QMessageBox.critical(
                         self, self.tr("KML Overlay"), self.tr(f"ERROR:\n{type(ex)}\n{ex}"))
-        logging.debug(self.dict_files)
+        LOGGER.debug(self.dict_files)
 
     def merge_file(self):
         checked_files = []  # list of indices of checked files
@@ -616,11 +617,11 @@ class KMLOverlayControlWidget(QtWidgets.QWidget, ui.Ui_KMLOverlayDockWidget):
                             element[0].append(sub_root)
                             count = count + 1
 
-                    logging.debug(et.tostring(super_root, encoding='utf-8').decode('UTF-8'))
+                    LOGGER.debug(et.tostring(super_root, encoding='utf-8').decode('UTF-8'))
                     newkml = et.Element("kml")  # create new <kml> element
                     newkml.attrib['xmlns'] = 'http://earth.google.com/kml/2.0'  # add xmlns attribute
                     newkml.insert(0, super_root)
-                    logging.debug(et.tostring(newkml, encoding='utf-8').decode('UTF-8'))
+                    LOGGER.debug(et.tostring(newkml, encoding='utf-8').decode('UTF-8'))
                     _dirname, _name = os.path.split(filename)
                     _fs = fs.open_fs(_dirname)
                     with _fs.open(_name, 'w') as output:  # write file
@@ -643,7 +644,7 @@ class KMLOverlayControlWidget(QtWidgets.QWidget, ui.Ui_KMLOverlayDockWidget):
                 elem.tag = et.QName(elem).localname
             et.cleanup_namespaces(root)
         except ValueError as ex:
-            logging.debug("Difficulty in removing namespace %s: %s", type(ex), ex)
+            LOGGER.debug("Difficulty in removing namespace %s: %s", type(ex), ex)
             for elem in root.getiterator():
                 if not hasattr(elem.tag, 'find'):
                     continue
@@ -651,4 +652,4 @@ class KMLOverlayControlWidget(QtWidgets.QWidget, ui.Ui_KMLOverlayDockWidget):
                 if i >= 0:
                     elem.tag = elem.tag[i + 1:]
             objectify.deannotate(root, cleanup_namespaces=True)
-            logging.debug("namespace removed by objectify.deannotate")
+            LOGGER.debug("namespace removed by objectify.deannotate")

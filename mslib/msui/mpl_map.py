@@ -388,7 +388,7 @@ class MapCanvas(basemap.Basemap):
         if not self.airspaces:
             airspaces = copy.deepcopy(get_airspaces(countries))
             if not airspaces:
-                logging.error("Tried to draw airspaces without asp files.")
+                mpl_logger.error("Tried to draw airspaces without asp files.")
                 return
 
             for i, airspace in enumerate(airspaces):
@@ -449,7 +449,7 @@ class MapCanvas(basemap.Basemap):
         if not self.airports:
             airports = get_airports()
             if not airports:
-                logging.error("Tried to draw airports but none were found. Try redownloading.")
+                mpl_logger.error("Tried to draw airports but none were found. Try redownloading.")
                 return
 
             lons, lats = self.projtran(*zip(*[(float(airport["longitude_deg"]),
@@ -564,7 +564,7 @@ class MapCanvas(basemap.Basemap):
             try:
                 self.map_boundary.remove()
             except NotImplementedError as ex:
-                logging.debug("%s", ex)
+                mpl_logger.debug("%s", ex)
             self.map_boundary = None
             self.ax.figure.canvas.draw()
         elif visible:
@@ -593,7 +593,7 @@ class MapCanvas(basemap.Basemap):
             self.__call__(axis[0], axis[2], inverse=True)
         self.kwargs['urcrnrlon'], self.kwargs['urcrnrlat'] = \
             self.__call__(axis[1], axis[3], inverse=True)
-        logging.debug("corner coordinates (lat/lon): ll(%.2f,%.2f), ur(%.2f,%.2f)",
+        mpl_logger.debug("corner coordinates (lat/lon): ll(%.2f,%.2f), ur(%.2f,%.2f)",
                       self.kwargs['llcrnrlat'], self.kwargs['llcrnrlon'],
                       self.kwargs['urcrnrlat'], self.kwargs['urcrnrlon'])
 
@@ -634,7 +634,7 @@ class MapCanvas(basemap.Basemap):
             try:
                 self.map_boundary.remove()
             except NotImplementedError as ex:
-                logging.debug("%s", ex)
+                mpl_logger.debug("%s", ex)
             self.map_boundary = None
 
         cont_vis = self.appearance["fill_continents"]
@@ -851,4 +851,4 @@ class SatelliteOverpassPatch:
             try:
                 element.remove()
             except Exception as ex:
-                logging.error("Wildcard exception caught: %s %s", type(ex), ex)
+                mpl_logger.error("Wildcard exception caught: %s %s", type(ex), ex)

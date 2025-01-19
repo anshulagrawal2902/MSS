@@ -428,7 +428,7 @@ class PathPlotter:
             # function. However, when I print the codes array in that function,
             # it looks fine -- correct length and correct codes. I can't figure
             # out why that error occurs.. (mr, 2013Feb08).
-            logging.error("%s %s", ex, type(ex))
+            mpl_logger.error("%s %s", ex, type(ex))
         self.ax.draw_artist(self.line)
         for t in self.wp_labels:
             self.ax.draw_artist(t)
@@ -602,7 +602,7 @@ class PathH_Plotter(PathPlotter):
         try:
             self.ax.draw_artist(self.pathpatch)
         except ValueError as error:
-            logging.debug("ValueError Exception '%s'", error)
+            mpl_logger.debug("ValueError Exception '%s'", error)
         self.ax.draw_artist(self.line)
         if self.wp_scatter is not None:
             self.ax.draw_artist(self.wp_scatter)
@@ -722,7 +722,7 @@ class PathV_Plotter(PathPlotter):
         try:
             self.ax.draw_artist(self.pathpatch)
         except ValueError as error:
-            logging.error("ValueError Exception %s", error)
+            mpl_logger.error("ValueError Exception %s", error)
         self.ax.draw_artist(self.line)
         for wp_label in self.wp_labels:
             self.ax.draw_artist(wp_label)
@@ -993,7 +993,7 @@ class VPathInteractor(PathInteractor):
             try:
                 self.redraw_xaxis(self.plotter.path.ilats, self.plotter.path.ilons, self.plotter.path.itimes)
             except AttributeError as err:
-                logging.debug("%s" % err)
+                mpl_logger.debug("%s" % err)
 
         self.plotter.ax.figure.canvas.draw()
 
@@ -1246,7 +1246,7 @@ class HPathInteractor(PathInteractor):
         x, y = event.xdata, event.ydata
         best_index = self.plotter.pathpatch.get_path().index_of_closest_segment(
             x, y, eps=self.appropriate_epsilon())
-        logging.debug("TopView insert point: clicked at (%f, %f), "
+        mpl_logger.debug("TopView insert point: clicked at (%f, %f), "
                       "best index: %d", x, y, best_index)
         self.plotter.pathpatch.get_path().insert_vertex(best_index, [x, y], WaypointsPath.LINETO)
 
@@ -1262,7 +1262,7 @@ class HPathInteractor(PathInteractor):
         elif len(wpm.all_waypoint_data()) > 0 and best_index == 0:
             flightlevel = wpm.waypoint_data(0).flightlevel
         else:
-            logging.error("Cannot copy flightlevel. best_index: %s, len: %s",
+            mpl_logger.error("Cannot copy flightlevel. best_index: %s, len: %s",
                           best_index, len(wpm.all_waypoint_data()))
             flightlevel = 0
         new_wp = ft.Waypoint(lat, lon, flightlevel, location=location)

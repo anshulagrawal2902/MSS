@@ -48,6 +48,7 @@ from mslib.msui import autoplot_dockwidget as apd
 from mslib.msui.icons import icons
 from mslib.msui.flighttrack import Waypoint
 from mslib.utils.colordialog import CustomColorDialog
+from mslib.utils import LOGGER
 
 # Dock window indices.
 WMS = 0
@@ -233,7 +234,7 @@ class MSUITopViewWindow(MSUIMplViewWindow, ui.Ui_TopViewWindow):
         Set up user interface, connect signal/slots.
         """
         super().__init__(parent, model, _id)
-        logging.debug(_id)
+        LOGGER.debug(_id)
         self.settings_tag = "topview"
         self.tutorial_mode = tutorial_mode
         # ToDo review 2026 after EOL of Win 10 if we can use parent again
@@ -530,7 +531,7 @@ class MSUITopViewWindow(MSUIMplViewWindow, ui.Ui_TopViewWindow):
                 # Return kwargs dictionary and do NOT redraw the map.
                 return kwargs
 
-            logging.debug("switching to map section '%s' - '%s'", current_map_key, kwargs)
+            LOGGER.debug("switching to map section '%s' - '%s'", current_map_key, kwargs)
             self.mpl.canvas.redraw_map(kwargs)
             self.mpl.navbar.clear_history()
 

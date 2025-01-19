@@ -52,6 +52,7 @@ from mslib.utils.qt import get_open_filenames, get_save_filename, show_popup
 from mslib.utils.config import read_config_file, config_loader
 from PyQt5 import QtGui, QtCore, QtWidgets
 from mslib.utils import release_info
+from mslib.utils import LOGGER
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
@@ -445,7 +446,7 @@ class MSUIMainWindow(QtWidgets.QMainWindow, ui.Ui_MSUIMainWindow):
             myappid = f"msui.msui.{__version__}"  # arbitrary string
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
         except (ImportError, AttributeError) as error:
-            logging.debug("AttributeError, ImportError Exception %s", error)
+            LOGGER.debug("AttributeError, ImportError Exception %s", error)
 
         self.config_editor = None
         self.local_active = True
@@ -626,7 +627,7 @@ class MSUIMainWindow(QtWidgets.QMainWindow, ui.Ui_MSUIMainWindow):
                 imported_function = getattr(imported_module, function)
             # wildcard exception to be resilient against error introduced by user code
             except Exception as ex:
-                logging.error("Error on import: %s: %s", type(ex), ex)
+                LOGGER.error("Error on import: %s: %s", type(ex), ex)
                 QtWidgets.QMessageBox.critical(
                     self.tr(f"ERROR: Configuration\n\n{plugins,}\n\nthrows {type(ex)} error:\n{ex}"))
                 continue
@@ -634,7 +635,7 @@ class MSUIMainWindow(QtWidgets.QMainWindow, ui.Ui_MSUIMainWindow):
                 self.add_plugin_submenu(name, extension, imported_function, picker_type, plugin_type="Import")
             # wildcard exception to be resilient against error introduced by user code
             except Exception as ex:
-                logging.error("Error on installing plugin: %s: %s", type(ex), ex)
+                LOGGER.error("Error on installing plugin: %s: %s", type(ex), ex)
                 QtWidgets.QMessageBox.critical(
                     self, self.tr("file io plugin error import plugins"),
                     self.tr(f"ERROR: Configuration\n\n{self.import_plugins}\n\nthrows {type(ex)} error:\n{ex}"))
@@ -653,7 +654,7 @@ class MSUIMainWindow(QtWidgets.QMainWindow, ui.Ui_MSUIMainWindow):
                 imported_function = getattr(imported_module, function)
             # wildcard exception to be resilient against error introduced by user code
             except Exception as ex:
-                logging.error("Error on import: %s: %s", type(ex), ex)
+                LOGGER.error("Error on import: %s: %s", type(ex), ex)
                 QtWidgets.QMessageBox.critical(
                     self, self.tr("file io plugin error export plugins"),
                     self.tr(f"ERROR: Configuration\n\n{plugins,}\n\nthrows {type(ex)} error:\n{ex}"))
@@ -662,7 +663,7 @@ class MSUIMainWindow(QtWidgets.QMainWindow, ui.Ui_MSUIMainWindow):
                 self.add_plugin_submenu(name, extension, imported_function, picker_type, plugin_type="Export")
             # wildcard exception to be resilient against error introduced by user code
             except Exception as ex:
-                logging.error("Error on installing plugin: %s: %s", type(ex), ex)
+                LOGGER.error("Error on installing plugin: %s: %s", type(ex), ex)
                 QtWidgets.QMessageBox.critical(
                     self, self.tr("file io plugin error import plugins"),
                     self.tr(f"ERROR: Configuration\n\n{self.export_plugins}\n\nthrows {type(ex)} error:\n{ex}"))
@@ -727,7 +728,7 @@ class MSUIMainWindow(QtWidgets.QMainWindow, ui.Ui_MSUIMainWindow):
                         function(filename, self.active_flight_track.name, self.active_flight_track.waypoints)
                 # wildcard exception to be resilient against error introduced by user code
                 except Exception as ex:
-                    logging.error("file io plugin error: %s %s", type(ex), ex)
+                    LOGGER.error("file io plugin error: %s %s", type(ex), ex)
                     QtWidgets.QMessageBox.critical(
                         self, self.tr("file io plugin error"),
                         self.tr(f"ERROR: {type(ex)} {ex}"))
@@ -772,7 +773,7 @@ class MSUIMainWindow(QtWidgets.QMainWindow, ui.Ui_MSUIMainWindow):
                     waypoints_model = ft.WaypointsTableModel(name=ft_name, waypoints=new_waypoints)
                 # wildcard exception to be resilient against error introduced by user code
                 except Exception as ex:
-                    logging.error("file io plugin error: %s %s", type(ex), ex)
+                    LOGGER.error("file io plugin error: %s %s", type(ex), ex)
                     QtWidgets.QMessageBox.critical(
                         self, self.tr("file io plugin error"),
                         self.tr(f"ERROR: {type(ex)} {ex}"))
@@ -820,7 +821,7 @@ class MSUIMainWindow(QtWidgets.QMainWindow, ui.Ui_MSUIMainWindow):
         self.signal_activate_flighttrack.emit(self.active_flight_track)
 
     def update_active_flight_track(self, old_flight_track_name=None):
-        logging.debug("update_active_flight_track")
+        LOGGER.debug("update_active_flight_track")
         for i in range(self.listViews.count()):
             view_item = self.listViews.item(i)
             view_item.window.setFlightTrackModel(self.active_flight_track)
@@ -865,7 +866,7 @@ class MSUIMainWindow(QtWidgets.QMainWindow, ui.Ui_MSUIMainWindow):
         filename = get_save_filename(
             self, "Save Flight Track", default_filename, ";;".join(file_type), pickertype=filepicker_default
         )
-        logging.debug("filename : '%s'", filename)
+        LOGGER.debug("filename : '%s'", filename)
         if filename:
             ext = "ftml"
             self.save_flight_track(filename)

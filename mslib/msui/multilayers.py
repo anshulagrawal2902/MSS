@@ -30,6 +30,7 @@ import mslib.msui.wms_control
 from mslib.msui.icons import icons
 from mslib.msui.qt5 import ui_wms_multilayers as ui
 from mslib.utils.config import save_settings_qsettings, load_settings_qsettings
+from mslib.utils import LOGGER
 
 
 class Multilayers(QtWidgets.QDialog, ui.Ui_MultilayersDialog):
@@ -621,7 +622,7 @@ class Layer(QtWidgets.QTreeWidgetItem):
             self.allowed_init_times = sorted(self.parent.dock_widget.parse_time_extent(values))
             self.itimes = [_time.isoformat() + "Z" for _time in self.allowed_init_times]
             if len(self.allowed_init_times) == 0:
-                logging.error("Cannot determine init time format of %s for %s", self.header.text(0), self.text(0))
+                LOGGER.error("Cannot determine init time format of %s for %s", self.header.text(0), self.text(0))
                 self.is_invalid = True
             else:
                 self.itime = self.itimes[-1]
@@ -639,11 +640,11 @@ class Layer(QtWidgets.QTreeWidgetItem):
             values = self.extents[self.vtime_name]["values"]
             self.allowed_valid_times = sorted(self.parent.dock_widget.parse_time_extent(values))
             while len(self.allowed_valid_times) > 1000:
-                logging.warning("Too many valid times (%s). discarding 90%%.", len(self.allowed_valid_times))
+                LOGGER.warning("Too many valid times (%s). discarding 90%%.", len(self.allowed_valid_times))
                 self.allowed_valid_times = self.allowed_valid_times[::10]
             self.vtimes = [_time.isoformat() + "Z" for _time in self.allowed_valid_times]
             if len(self.allowed_valid_times) == 0:
-                logging.error("Cannot determine valid time format of %s for %s", self.header.text(0), self.text(0))
+                LOGGER.error("Cannot determine valid time format of %s for %s", self.header.text(0), self.text(0))
                 self.is_invalid = True
             else:
                 if self.itime:

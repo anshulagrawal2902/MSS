@@ -34,7 +34,7 @@ import sqlalchemy.types
 
 from mslib.mscolab.app import db
 from mslib.mscolab.message_type import MessageType
-
+from mslib.utils import LOGGER
 
 class AwareDateTime(sqlalchemy.types.TypeDecorator):
     impl = sqlalchemy.types.DateTime
@@ -116,7 +116,7 @@ class User(db.Model):
                 algorithms=["HS256"]
             )
         except Exception as e:
-            logging.debug("Bad Token %s", str(e))
+            LOGGER.debug("Bad Token %s", str(e))
             return None
 
         user = User.query.filter_by(id=data.get('id')).first()

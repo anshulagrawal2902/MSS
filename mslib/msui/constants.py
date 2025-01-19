@@ -32,6 +32,8 @@ import os
 import logging
 import platformdirs
 
+from mslib.utils import LOGGER
+
 # ToDo refactor to generic functions, keep only constants
 HOME = os.path.expanduser(f"~{os.path.sep}")
 MSUI_CONFIG_PATH = os.getenv("MSUI_CONFIG_PATH", os.path.join(HOME, ".config", "msui"))
@@ -56,14 +58,14 @@ if '://' in MSUI_SETTINGS:
             with _fs.open(file_name, 'w') as fid:
                 fid.write("{}")
     except fs.errors.CreateFailed:
-        logging.error('"%s" can''t be created', MSUI_SETTINGS)
+        LOGGER.error('"%s" can''t be created', MSUI_SETTINGS)
 else:
     if not os.path.exists(MSUI_SETTINGS):
         try:
             with open(MSUI_SETTINGS, 'w') as fid:
                 fid.write("{}")
         except IOError:
-            logging.error('"%s" can''t be created', MSUI_SETTINGS)
+            LOGGER.error('"%s" can''t be created', MSUI_SETTINGS)
 
 # ToDo refactor to a function
 MSS_AUTOPLOT = os.getenv('MSS_AUTOPLOT', os.path.join(MSUI_CONFIG_PATH, "mssautoplot.json"))
@@ -78,13 +80,13 @@ if '://' in MSS_AUTOPLOT:
             with _fs.open(file_name, 'w') as fid:
                 fid.write("{}")
     except fs.errors.CreateFailed:
-        logging.error('"%s" can''t be created', MSS_AUTOPLOT)
+        LOGGER.error('"%s" can''t be created', MSS_AUTOPLOT)
 else:
     if not os.path.exists(MSS_AUTOPLOT):
         try:
             with open(MSS_AUTOPLOT, 'w') as fid:
                 fid.write("{}")
         except IOError:
-            logging.error('"%s" can''t be created', MSS_AUTOPLOT)
+            LOGGER.error('"%s" can''t be created', MSS_AUTOPLOT)
 
 AUTH_LOGIN_CACHE = {}

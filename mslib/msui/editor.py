@@ -38,6 +38,7 @@ from mslib.msui.icons import icons
 from mslib.utils.config import MSUIDefaultConfig as mss_default
 from mslib.utils.config import config_loader, dict_raise_on_duplicates_empty, merge_dict
 from mslib.utils.get_projection_params import get_projection_params
+from mslib.utils import LOGGER
 
 from mslib.support.qt_json_view import delegate
 from mslib.support.qt_json_view.view import JsonView
@@ -357,7 +358,7 @@ class ConfigurationEditorWindow(QtWidgets.QMainWindow, ui_conf.Ui_ConfigurationE
     def add_option_handler(self):
         selection = self.view.selectionModel().selectedRows()
         if len(selection) == 0 or len(selection) > 1:
-            logging.debug("zero or multiple selections while trying to add new value")
+            LOGGER.debug("zero or multiple selections while trying to add new value")
             self.statusbar.showMessage("Please select one option to add new value")
             return
 
@@ -399,14 +400,14 @@ class ConfigurationEditorWindow(QtWidgets.QMainWindow, ui_conf.Ui_ConfigurationE
                 self.view.scrollTo(proxy_index)
                 self.view.selectionModel().select(
                     proxy_index, QtCore.QItemSelectionModel.ClearAndSelect | QtCore.QItemSelectionModel.Rows)
-                logging.debug("Added new value for %s", option)
+                LOGGER.debug("Added new value for %s", option)
                 self.update_view()
                 break
 
     def remove_option_handler(self):
         selection = self.view.selectionModel().selectedRows()
         if len(selection) == 0:
-            logging.debug("zero selections while trying to remove option")
+            LOGGER.debug("zero selections while trying to remove option")
             self.statusbar.showMessage("Please select one/more options to remove")
             return
 
@@ -441,7 +442,7 @@ class ConfigurationEditorWindow(QtWidgets.QMainWindow, ui_conf.Ui_ConfigurationE
         # ToDo add confirmation dialog here
 
         options = "\n".join([index.data() for index in removable_indexes])
-        logging.debug("Attempting to remove the following options\n%s", options)
+        LOGGER.debug("Attempting to remove the following options\n%s", options)
 
         self.view.selectionModel().clearSelection()
         for index in removable_indexes:
@@ -475,7 +476,7 @@ class ConfigurationEditorWindow(QtWidgets.QMainWindow, ui_conf.Ui_ConfigurationE
 
         selection = self.view.selectionModel().selectedRows()
         if len(selection) == 0:
-            logging.debug("no selections while trying to restore defaults")
+            LOGGER.debug("no selections while trying to restore defaults")
             self.statusbar.showMessage("Please select one/more options to restore defaults")
             return
 
@@ -498,7 +499,7 @@ class ConfigurationEditorWindow(QtWidgets.QMainWindow, ui_conf.Ui_ConfigurationE
         # ToDo add confirmation dialog here
 
         options = "\n".join([index.data() for index in selected_indexes])
-        logging.debug("Attempting to restore defaults for the following options\n%s", options)
+        LOGGER.debug("Attempting to restore defaults for the following options\n%s", options)
 
         for index in selected_indexes:
             # check if root option and present in mss_default.key_value_options
@@ -556,11 +557,11 @@ class ConfigurationEditorWindow(QtWidgets.QMainWindow, ui_conf.Ui_ConfigurationE
                     json_file_data = json.loads(file_content, object_pairs_hook=dict_raise_on_duplicates_empty)
                 except json.JSONDecodeError as e:
                     show_popup(self, "Error while loading file", e)
-                    logging.error("Error while loading json file %s", e)
+                    LOGGER.error("Error while loading json file %s", e)
                     return
                 except ValueError as e:
                     show_popup(self, "Invalid keys detected", e)
-                    logging.error("Error while loading json file %s", e)
+                    LOGGER.error("Error while loading json file %s", e)
                     return
 
         if json_file_data:
@@ -575,10 +576,10 @@ class ConfigurationEditorWindow(QtWidgets.QMainWindow, ui_conf.Ui_ConfigurationE
             self.set_noneditable_items(QtCore.QModelIndex())
             self.update_view()
             self.statusbar.showMessage("Successfully imported config")
-            logging.debug("Imported new config data from file")
+            LOGGER.debug("Imported new config data from file")
         else:
             self.statusbar.showMessage("No data found in the file")
-            logging.debug("No data found in the file, using existing settings")
+            LOGGER.debug("No data found in the file, using existing settings")
 
     def _save_to_path(self, filename):
         self.last_saved = self.json_model.serialize()
@@ -678,7 +679,7 @@ class ConfigurationEditorWindow(QtWidgets.QMainWindow, ui_conf.Ui_ConfigurationE
                     QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
                     QtWidgets.QMessageBox.No)
                 if ret == QtWidgets.QMessageBox.Yes:
-                    logging.debug("saving config file to: %s and restarting MSS", self.path)
+                    LOGGER.debug("saving config file to: %s and restarting MSS", self.path)
                     self._save_to_path(self.path)
                     self.restartApplication.emit()
                     self.restart_on_save = False
@@ -686,7 +687,7 @@ class ConfigurationEditorWindow(QtWidgets.QMainWindow, ui_conf.Ui_ConfigurationE
                 else:
                     return
             self.restart_on_save = True
-            logging.debug("saving config file to: %s", self.path)
+            LOGGER.debug("saving config file to: %s", self.path)
             self._save_to_path(self.path)
         else:
             self.statusbar.showMessage("No values changed")

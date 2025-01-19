@@ -34,6 +34,7 @@ from saml2 import SAMLError
 from saml2.client import Saml2Client
 from saml2.config import SPConfig
 from urllib.parse import urlparse
+from mslib.utils import LOGGER
 
 
 class default_mscolab_settings:
@@ -142,16 +143,16 @@ mscolab_settings = default_mscolab_settings()
 
 try:
     import mscolab_settings as user_settings
-    logging.info("Using user defined settings")
+    LOGGER.info("Using user defined settings")
     mscolab_settings.__dict__.update(user_settings.__dict__)
 except ImportError as ex:
-    logging.warning(u"Couldn't import mscolab_settings (ImportError:'%s'), using dummy config.", ex)
+    LOGGER.warning(u"Couldn't import mscolab_settings (ImportError:'%s'), using dummy config.", ex)
 
 try:
     from setup_saml2_backend import setup_saml2_backend
-    logging.info("Using user defined saml2 settings")
+    LOGGER.info("Using user defined saml2 settings")
 except ImportError as ex:
-    logging.warning(u"Couldn't import setup_saml2_backend (ImportError:'%s'), using dummy config.", ex)
+    LOGGER.warning(u"Couldn't import setup_saml2_backend (ImportError:'%s'), using dummy config.", ex)
 
     class setup_saml2_backend:
         # idp settings

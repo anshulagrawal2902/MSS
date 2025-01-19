@@ -73,6 +73,7 @@ from mslib.msui.qt5 import ui_mscolab_profile_dialog as ui_profile
 from mslib.msui.qt5 import ui_operation_archive as ui_opar
 from mslib.msui import constants
 from mslib.utils.config import config_loader, modify_config_file
+from mslib.utils import LOGGER
 
 
 def verify_user_token(func):
@@ -94,7 +95,7 @@ def verify_user_token(func):
         except (MSColabConnectionError, socketio.exceptions.SocketIOError) as ex:
             if verify_user_token.depth > 1:
                 raise
-            logging.error("%s %s", type(ex), ex)
+            LOGGER.error("%s %s", type(ex), ex)
             show_popup(self.ui, "Error", str(ex))
             self.logout()
         finally:
@@ -115,7 +116,7 @@ class MSColab_OperationArchiveBrowser(QDialog, ui_opar.Ui_OperationArchiveBrowse
         self.setModal(True)
 
     def select_archived_operation(self, item):
-        logging.debug('select_inactive_operation')
+        LOGGER.debug('select_inactive_operation')
         if item.access_level in ["creator", "admin"]:
             self.archived_op_id = item.op_id
             self.pbUnarchiveOperation.setEnabled(True)
@@ -125,7 +126,7 @@ class MSColab_OperationArchiveBrowser(QDialog, ui_opar.Ui_OperationArchiveBrowse
 
     def unarchive_operation(self):
         if _verify_user_token(self.mscolab.mscolab_server_url, self.mscolab.token):
-            logging.debug('unarchive_operation')
+            LOGGER.debug('unarchive_operation')
             try:
                 res = self.mscolab.conn.request_post(
                     "update_operation",
@@ -133,7 +134,7 @@ class MSColab_OperationArchiveBrowser(QDialog, ui_opar.Ui_OperationArchiveBrowse
                      "attribute": "active",
                      "value": "True"})
             except requests.exceptions.RequestException as e:
-                logging.debug(e)
+                LOGGER.debug(e)
                 show_popup(self.parent, "Error", "Some error occurred! Could not unarchive operation.")
                 self.logout()
             else:
@@ -229,7 +230,7 @@ class MSColab_ConnectDialog(QDialog, ui_conn.Ui_MSColabConnectDialog):
             self.statusLabel.setStyleSheet("")
             msg = "ⓘ  " + msg
         self.statusLabel.setText(msg)
-        logging.debug("set_status: %s", msg)
+        LOGGER.debug("set_status: %s", msg)
         QtWidgets.QApplication.processEvents()
 
     def add_mscolab_urls(self):
@@ -309,22 +310,22 @@ class MSColab_ConnectDialog(QDialog, ui_conn.Ui_MSColabConnectDialog):
                 self.connectBtn.hide()
                 self.disconnectBtn.show()
             else:
-                logging.error("Error %s", response)
+                LOGGER.error("Error %s", response)
                 self.set_status("Error", "Some unexpected error occurred. Please try again.")
         except requests.exceptions.SSLError:
-            logging.debug("Certificate Verification Failed")
+            LOGGER.debug("Certificate Verification Failed")
             self.set_status("Error", "Certificate Verification Failed.")
         except requests.exceptions.InvalidSchema:
-            logging.debug("invalid schema of url")
+            LOGGER.debug("invalid schema of url")
             self.set_status("Error", "Invalid Url Scheme.")
         except requests.exceptions.InvalidURL:
-            logging.debug("invalid url")
+            LOGGER.debug("invalid url")
             self.set_status("Error", "Invalid URL.")
         except requests.exceptions.ConnectionError:
-            logging.debug("MSColab server isn't active")
+            LOGGER.debug("MSColab server isn't active")
             self.set_status("Error", "MSColab server isn't active.")
         except Exception as ex:
-            logging.error("Error %s %s", type(ex), str(ex))
+            LOGGER.error("Error %s %s", type(ex), str(ex))
             self.set_status("Error", "Some unexpected error occurred. Please try again.")
 
     def disconnect_handler(self):
@@ -362,7 +363,7 @@ class MSColab_ConnectDialog(QDialog, ui_conn.Ui_MSColabConnectDialog):
             response = session.post(url, data=data, timeout=tuple(config_loader(dataset="MSCOLAB_timeout")))
             response.raise_for_status()
         except requests.exceptions.RequestException as ex:
-            logging.error("unexpected error: %s %s %s", type(ex), url, ex)
+            LOGGER.error("unexpected error: %s %s %s", type(ex), url, ex)
             self.set_status(
                 "Error",
                 f'Failed to establish a new connection to "{self.mscolab_server_url}". Try again in a moment.',
@@ -421,13 +422,13 @@ class MSColab_ConnectDialog(QDialog, ui_conn.Ui_MSColabConnectDialog):
                     self.set_status("Success", 'Succesfully logged into mscolab server')
 
         except requests.exceptions.RequestException as error:
-            logging.error("unexpected error: %s %s %s", type(error), url, error)
+            LOGGER.error("unexpected error: %s %s %s", type(error), url, error)
 
     def save_user_credentials_to_config_file(self, emailid, password):
         try:
             save_password_to_keyring(service_name=self.mscolab_server_url, username=emailid, password=password)
         except (NoKeyringError, PasswordSetError, InitError) as ex:
-            logging.warning("Can't use Keyring on your system:  %s" % ex)
+            LOGGER.warning("Can't use Keyring on your system:  %s" % ex)
         mss_auth = config_loader(dataset="MSS_auth")
         if mss_auth.get(self.mscolab_server_url) != emailid:
             ret = QMessageBox.question(
@@ -461,7 +462,7 @@ class MSColab_ConnectDialog(QDialog, ui_conn.Ui_MSColabConnectDialog):
         try:
             response = session.post(url, data=data, timeout=tuple(config_loader(dataset="MSCOLAB_timeout")))
         except requests.exceptions.RequestException as ex:
-            logging.error("unexpected error: %s %s %s", type(ex), url, ex)
+            LOGGER.error("unexpected error: %s %s %s", type(ex), url, ex)
             self.set_status(
                 "Error",
                 f'Failed to establish a new connection to "{self.mscolab_server_url}". Try again in a moment.',
@@ -485,7 +486,7 @@ class MSColab_ConnectDialog(QDialog, ui_conn.Ui_MSColabConnectDialog):
             try:
                 error_msg = response.json()["message"]
             except Exception as e:
-                logging.debug("Unexpected error occurred %s", e)
+                LOGGER.debug("Unexpected error occurred %s", e)
                 error_msg = "Unexpected error occurred. Please try again."
             self.set_status("Error", error_msg)
 
@@ -649,11 +650,11 @@ class MSUIMscolab(QtCore.QObject):
             try:
                 _ = fs.open_fs(self.data_dir)
             except fs.errors.CreateFailed:
-                logging.error('Make sure that the FS url "%s" exists', self.data_dir)
+                LOGGER.error('Make sure that the FS url "%s" exists', self.data_dir)
                 show_popup(self.ui, "Error", f'FS Url: "{self.data_dir}" does not exist!')
                 sys.exit()
             except fs.opener.errors.UnsupportedProtocol:
-                logging.error('FS url "%s" not supported', self.data_dir)
+                LOGGER.error('FS url "%s" not supported', self.data_dir)
                 show_popup(self.ui, "Error", f'FS Url: "{self.data_dir}" not supported!')
                 sys.exit()
         else:
@@ -680,7 +681,7 @@ class MSUIMscolab(QtCore.QObject):
         self.connect_window.exec_()
 
     def after_login(self, emailid, url, response):
-        logging.debug("after login %s %s", emailid, url)
+        LOGGER.debug("after login %s %s", emailid, url)
         # emailid by direct call
         self.email = emailid
         self.connect_window.close()
@@ -781,10 +782,10 @@ class MSUIMscolab(QtCore.QObject):
                 try:
                     config_fs.makedirs("gravatars")
                 except fs.errors.CreateFailed:
-                    logging.error('Creation of gravatar directory failed')
+                    LOGGER.error('Creation of gravatar directory failed')
                     return
                 except fs.opener.errors.UnsupportedProtocol:
-                    logging.error('FS url not supported')
+                    LOGGER.error('FS url not supported')
                     return
 
             # use cached image if refresh not requested
@@ -996,7 +997,7 @@ class MSUIMscolab(QtCore.QObject):
 
     @verify_user_token
     def add_operation(self):
-        logging.debug("add_operation")
+        LOGGER.debug("add_operation")
         path = self.add_proj_dialog.path.text()
         description = self.add_proj_dialog.description.toPlainText()
         category = self.add_proj_dialog.category.text()
@@ -1046,7 +1047,7 @@ class MSUIMscolab(QtCore.QObject):
         """
         get most recent operation's op_id
         """
-        logging.debug('get_recent_op_id')
+        LOGGER.debug('get_recent_op_id')
         skip_archived = config_loader(dataset="MSCOLAB_skip_archived_operations")
         response = self.conn.request_get("operations", {"skip_archived": skip_archived})
         if response.text == "False":
@@ -1056,7 +1057,7 @@ class MSUIMscolab(QtCore.QObject):
         op_id = None
         if operations:
             op_id = operations[-1]["op_id"]
-        logging.debug("recent op_id %s", op_id)
+        LOGGER.debug("recent op_id %s", op_id)
         return op_id
 
     def operation_options_handler(self):
@@ -1174,7 +1175,7 @@ class MSUIMscolab(QtCore.QObject):
 
     @verify_user_token
     def handle_delete_operation(self):
-        logging.debug("handle_delete_operation")
+        LOGGER.debug("handle_delete_operation")
         entered_operation_name, ok = QtWidgets.QInputDialog.getText(
             self.ui,
             self.ui.tr("Delete Operation"),
@@ -1199,7 +1200,7 @@ class MSUIMscolab(QtCore.QObject):
 
     @verify_user_token
     def handle_leave_operation(self):
-        logging.debug("handle_leave_operation")
+        LOGGER.debug("handle_leave_operation")
         reply = QMessageBox.question(
             self.ui, self.tr('Mission Support System'),
             self.tr("Do you want to leave this operation?"),
@@ -1234,7 +1235,7 @@ class MSUIMscolab(QtCore.QObject):
 
     @verify_user_token
     def change_category_handler(self, _=None):
-        logging.debug('change_category_handler')
+        LOGGER.debug('change_category_handler')
         # only after login
         entered_operation_category, ok = QtWidgets.QInputDialog.getText(
             self.ui,
@@ -1266,7 +1267,7 @@ class MSUIMscolab(QtCore.QObject):
 
     @verify_user_token
     def change_description_handler(self, _=None):
-        logging.debug('change_description_handler')
+        LOGGER.debug('change_description_handler')
         # only after login
         entered_operation_desc, ok = QtWidgets.QInputDialog.getText(
             self.ui,
@@ -1300,7 +1301,7 @@ class MSUIMscolab(QtCore.QObject):
 
     @verify_user_token
     def rename_operation_handler(self, _=None):
-        logging.debug('rename_operation_handler')
+        LOGGER.debug('rename_operation_handler')
         # only after login
         entered_operation_name, ok = QtWidgets.QInputDialog.getText(
             self.ui,
@@ -1387,7 +1388,7 @@ class MSUIMscolab(QtCore.QObject):
         self.reload_view_windows()
 
     def operation_category_handler(self, update_operations=True):
-        logging.debug('operation_category_handler')
+        LOGGER.debug('operation_category_handler')
         # only after_login
         if self.mscolab_server_url is not None:
             self.selected_category = self.ui.filterCategoryCb.currentText()
@@ -1458,7 +1459,7 @@ class MSUIMscolab(QtCore.QObject):
         """
         get most recent operation
         """
-        logging.debug('get_recent_operation')
+        LOGGER.debug('get_recent_operation')
         response = self.conn.request_get("operations")
         if response.text == "False":
             raise MSColabConnectionError("Session expired, new login required")
@@ -1492,7 +1493,7 @@ class MSUIMscolab(QtCore.QObject):
 
         to render new permission if added
         """
-        logging.debug('render_new_permission')
+        LOGGER.debug('render_new_permission')
         response = self.conn.request_get("user")
         if response.text != "False":
             response = response.json()
@@ -1522,7 +1523,7 @@ class MSUIMscolab(QtCore.QObject):
 
         function updates existing permissions and related control availability
         """
-        logging.debug('handle_update_permission')
+        LOGGER.debug('handle_update_permission')
         if u_id == self.user["id"]:
             # update table of operations
             operation_name = None
@@ -1555,9 +1556,9 @@ class MSUIMscolab(QtCore.QObject):
             self.chat_window.load_users()
 
     def delete_operation_from_list(self, op_id):
-        logging.debug('delete operation op_id: %s and active_id is: %s' % (op_id, self.active_op_id))
+        LOGGER.debug('delete operation op_id: %s and active_id is: %s' % (op_id, self.active_op_id))
         if self.active_op_id == op_id:
-            logging.debug('delete_operation_from_list doing: %s' % op_id)
+            LOGGER.debug('delete_operation_from_list doing: %s' % op_id)
             self.update_views()
             self.active_op_id = None
             self.access_level = None
@@ -1576,13 +1577,13 @@ class MSUIMscolab(QtCore.QObject):
                 remove_item = item
                 break
         if remove_item is not None:
-            logging.debug("remove_item: %s", remove_item)
+            LOGGER.debug("remove_item: %s", remove_item)
             self.ui.listOperationsMSC.takeItem(self.ui.listOperationsMSC.row(remove_item))
             return remove_item.operation_path
 
     @QtCore.pyqtSlot(int, int)
     def handle_revoke_permission(self, op_id, u_id):
-        logging.debug('handle_revoke_permission')
+        LOGGER.debug('handle_revoke_permission')
         if u_id == self.user["id"]:
             revoked_operation_currently_active = True if self.active_op_id == op_id else False
             operation_name = self.delete_operation_from_list(op_id)
@@ -1601,7 +1602,7 @@ class MSUIMscolab(QtCore.QObject):
 
     @QtCore.pyqtSlot(int)
     def handle_operation_deleted(self, op_id):
-        logging.debug('handle_operation_deleted %s %s', op_id, self.active_op_id)
+        LOGGER.debug('handle_operation_deleted %s %s', op_id, self.active_op_id)
         old_operation_name = self.active_operation_name
         old_active_id = self.active_op_id
         operation_name = self.delete_operation_from_list(op_id)
@@ -1625,7 +1626,7 @@ class MSUIMscolab(QtCore.QObject):
         """
         adds the list of operation categories to the UI
         """
-        logging.debug('show_categories_to_ui')
+        LOGGER.debug('show_categories_to_ui')
         response = None
         if ops is not None:
             response = ops
@@ -1654,7 +1655,7 @@ class MSUIMscolab(QtCore.QObject):
 
     @verify_user_token
     def add_operations_to_ui(self):
-        logging.debug('add_operations_to_ui')
+        LOGGER.debug('add_operations_to_ui')
         skip_archived = config_loader(dataset="MSCOLAB_skip_archived_operations")
         response = self.conn.request_get("operations", {"skip_archived": skip_archived})
         if response.text == "False":
@@ -1690,13 +1691,13 @@ class MSUIMscolab(QtCore.QObject):
             else:
                 self.operation_archive_browser.listArchivedOperations.addItem(widgetItem)
         if new_operation is not None:
-            logging.debug("%s %s %s", new_operation, self.new_op_id, self.active_op_id)
+            LOGGER.debug("%s %s %s", new_operation, self.new_op_id, self.active_op_id)
             self.ui.listOperationsMSC.itemActivated.emit(new_operation)
         elif active_operation is not None:
-            logging.debug("%s %s %s", new_operation, self.new_op_id, self.active_op_id)
+            LOGGER.debug("%s %s %s", new_operation, self.new_op_id, self.active_op_id)
             self.ui.listOperationsMSC.itemActivated.emit(active_operation)
         elif self.active_op_id is not None:
-            logging.debug("%s %s %s", new_operation, self.new_op_id, self.active_op_id)
+            LOGGER.debug("%s %s %s", new_operation, self.new_op_id, self.active_op_id)
             show_popup(self.ui, "Information",
                        f'Active operation "{self.active_operation_name}" is inaccessible!', icon=1)
             self._activate_first_local_flighttrack()
@@ -1706,14 +1707,14 @@ class MSUIMscolab(QtCore.QObject):
         return response
 
     def show_operation_options_in_inactivated_state(self, access_level):
-        logging.debug('show_operation_options_in_inactivated_state')
+        LOGGER.debug('show_operation_options_in_inactivated_state')
         self.ui.actionUnarchiveOperation.setEnabled(False)
         if access_level in ["creator", "admin"]:
             self.ui.actionUnarchiveOperation.setEnabled(True)
 
     @verify_user_token
     def archive_operation(self, _):
-        logging.debug("handle_archive_operation")
+        LOGGER.debug("handle_archive_operation")
         ret = QMessageBox.warning(
             self.ui, self.tr("Mission Support System"),
             self.tr(f"Do you want to archive this operation '{self.active_operation_name}'?"),
@@ -1730,12 +1731,12 @@ class MSUIMscolab(QtCore.QObject):
             response.raise_for_status()
             self.reload_operations()
             self.signal_operation_removed.emit(self.active_op_id)
-            logging.debug("activate local")
+            LOGGER.debug("activate local")
             self._activate_first_local_flighttrack()
 
     @verify_user_token
     def set_active_op_id(self, item):
-        logging.debug('set_active_op_id %s %s %s', item, item.op_id, self.active_op_id)
+        LOGGER.debug('set_active_op_id %s %s %s', item, item.op_id, self.active_op_id)
         if not self.ui.local_active and item.op_id == self.active_op_id:
             return
 
@@ -1792,7 +1793,7 @@ class MSUIMscolab(QtCore.QObject):
         self.conn.select_operation(item.op_id)
 
     def switch_to_local(self):
-        logging.debug('switch_to_local')
+        LOGGER.debug('switch_to_local')
         self.ui.local_active = True
         if self.active_op_id is not None:
             self._handle_font_bolding()
@@ -1890,7 +1891,7 @@ class MSUIMscolab(QtCore.QObject):
             self.waypoints_model.dataChanged.connect(self.handle_waypoints_changed)
 
     def reload_operations(self):
-        logging.debug('reload_operations')
+        LOGGER.debug('reload_operations')
         ops = self.add_operations_to_ui()
         selected_category = self.ui.filterCategoryCb.currentText()
         self.show_categories_to_ui(ops)
@@ -1906,7 +1907,7 @@ class MSUIMscolab(QtCore.QObject):
 
     @verify_user_token
     def handle_waypoints_changed(self, _1=None, _2=None, _3=None):
-        logging.debug("handle_waypoints_changed")
+        LOGGER.debug("handle_waypoints_changed")
         if self.ui.workLocallyCheckbox.isChecked():
             self.waypoints_model.save_to_ftml(self.local_ftml_file)
         else:
@@ -1917,7 +1918,7 @@ class MSUIMscolab(QtCore.QObject):
             self.lastChangeMessage = ""
 
     def reload_view_windows(self):
-        logging.debug("reload_view_windows")
+        LOGGER.debug("reload_view_windows")
         if self.ui.local_active:
             return
 
@@ -1930,11 +1931,11 @@ class MSUIMscolab(QtCore.QObject):
                 try:
                     window.mpl.canvas.waypoints_interactor.redraw_figure()
                 except AttributeError as err:
-                    logging.error("%s" % err)
+                    LOGGER.error("%s" % err)
 
     @verify_user_token
     def handle_import_msc(self, file_path, extension, function, pickertype):
-        logging.debug("handle_import_msc")
+        LOGGER.debug("handle_import_msc")
         if self.active_op_id is None:
             return
         if file_path is None:
@@ -1971,7 +1972,7 @@ class MSUIMscolab(QtCore.QObject):
 
     @verify_user_token
     def handle_export_msc(self, extension, function, pickertype):
-        logging.debug("handle_export_msc")
+        LOGGER.debug("handle_export_msc")
         if self.active_op_id is None:
             return
 
@@ -1994,12 +1995,12 @@ class MSUIMscolab(QtCore.QObject):
             show_popup(self.ui, "Export Success", f"The file - {file_name}, was exported successfully!", 1)
 
     def listFlighttrack_itemDoubleClicked(self):
-        logging.debug("listFlighttrack_itemDoubleClicked")
+        LOGGER.debug("listFlighttrack_itemDoubleClicked")
         self.ui.activeOperationDesc.setText("Select Operation to View Description.")
         self.signal_listFlighttrack_doubleClicked.emit()
 
     def logout(self):
-        logging.debug('logout')
+        LOGGER.debug('logout')
         if self.mscolab_server_url is None:
             return
         self.ui.local_active = True

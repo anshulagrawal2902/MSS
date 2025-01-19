@@ -30,6 +30,8 @@ import logging
 
 import numpy as np
 
+from mslib.utils import LOGGER
+
 AIRCRAFT_DUMMY = {
     "name": "DUMMY",
     "takeoff_weight": 90000,
@@ -152,7 +154,7 @@ class SimpleAircraft:
         if hasattr(self, "_ceiling_poly"):
             maxFL = int(np.polyval(self._ceiling_poly, grossweight))
         else:
-            logging.error("No data stored for computation of ceiling altitude. "
+            LOGGER.error("No data stored for computation of ceiling altitude. "
                           "Please reload performance data from JSON.")
             maxFL = 410
         return maxFL

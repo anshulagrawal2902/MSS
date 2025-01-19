@@ -39,6 +39,7 @@ from PyQt5 import QtCore
 from mslib.utils.mssautoplot import main as cli_tool
 from mslib.msui.qt5.ui_mss_autoplot import Ui_AutoplotDockWidget
 from mslib.msui import constants as const
+from mslib.utils import LOGGER
 
 
 class AutoplotDockWidget(QWidget, Ui_AutoplotDockWidget):
@@ -202,7 +203,7 @@ class AutoplotDockWidget(QWidget, Ui_AutoplotDockWidget):
             ctx.obj = self
             ctx.invoke(cli_tool, **args)
         except SystemExit as ex:
-            logging.error("Can't find given data: %s", ex)
+            LOGGER.error("Can't find given data: %s", ex)
             QMessageBox.information(
                 self,
                 "Error",

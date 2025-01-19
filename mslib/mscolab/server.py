@@ -51,7 +51,7 @@ from mslib.mscolab.conf import mscolab_settings, setup_saml2_backend
 from mslib.mscolab.models import Change, MessageType, User
 from mslib.mscolab.sockets_manager import _setup_managers
 from mslib.mscolab.utils import create_files, get_message_dict
-from mslib.utils import conditional_decorator
+from mslib.utils import conditional_decorator, LOGGER
 from mslib.index import create_app
 from mslib.mscolab.forms import ResetRequestForm, ResetPasswordForm
 from mslib.mscolab import migrations
@@ -81,7 +81,7 @@ your database MSColab will abort. Please follow the documentation for a manual d
     )
     # If a database connection to migrate from is set and the target database is empty, then migrate the existing data
     if is_empty_database and mscolab_settings.SQLALCHEMY_DB_URI_TO_MIGRATE_FROM is not None:
-        logging.info("The target database is empty and a database to migrate from is set, starting the data migration")
+        LOGGER.info("The target database is empty and a database to migrate from is set, starting the data migration")
         source_engine = sqlalchemy.create_engine(mscolab_settings.SQLALCHEMY_DB_URI_TO_MIGRATE_FROM)
         source_metadata = sqlalchemy.MetaData()
         source_metadata.reflect(bind=source_engine)
@@ -101,10 +101,10 @@ your database MSColab will abort. Please follow the documentation for a manual d
                 if table.name == "alembic_version":
                     # Do not migrate the alembic_version table!
                     continue
-                logging.debug("Copying table %s", table.name)
+                LOGGER.debug("Copying table %s", table.name)
                 stmt = target_metadata.tables[table.name].insert()
                 for row in src_connection.execute(table.select()):
-                    logging.debug("Copying row %s", row)
+                    LOGGER.debug("Copying row %s", row)
                     row = tuple(
                         r.replace(tzinfo=datetime.timezone.utc) if isinstance(r, datetime.datetime) else r for r in row
                     )
@@ -113,7 +113,7 @@ your database MSColab will abort. Please follow the documentation for a manual d
             if target_engine.name == "postgresql":
                 # Fix the databases auto-increment sequences, if it is a PostgreSQL database
                 # For reference, see: https://wiki.postgresql.org/wiki/Fixing_Sequences
-                logging.info("Using a PostgreSQL database, will fix up sequences")
+                LOGGER.info("Using a PostgreSQL database, will fix up sequences")
                 cur = target_connection.execute(sqlalchemy.text(r"""
 SELECT
     'SELECT SETVAL(' ||
@@ -138,12 +138,12 @@ ORDER BY sequence_namespace.nspname, class_sequence.relname;
                 for stmt, in cur.all():
                     target_connection.execute(sqlalchemy.text(stmt))
                 target_connection.commit()
-        logging.info("Data migration finished")
+        LOGGER.info("Data migration finished")
 
     # Upgrade to the latest database revision
     flask_migrate.upgrade(directory=migrations.__path__[0])
 
-    logging.info("Database initialised successfully!")
+    LOGGER.info("Database initialised successfully!")
 
 
 APP = create_app(__name__, imprint=mscolab_settings.IMPRINT, gdpr=mscolab_settings.GDPR)
@@ -157,7 +157,7 @@ auth = HTTPBasicAuth()
 try:
     from mscolab_auth import mscolab_auth
 except ImportError as ex:
-    logging.warning("Couldn't import mscolab_auth (ImportError:'{%s), creating dummy config.", ex)
+    LOGGER.warning("Couldn't import mscolab_auth (ImportError:'{%s), creating dummy config.", ex)
 
     class mscolab_auth:
         allowed_users = [("mscolab", "add_md5_digest_of_PASSWORD_here"),
@@ -166,7 +166,7 @@ except ImportError as ex:
 
 # setup http auth
 if mscolab_settings.__dict__.get('enable_basic_http_authentication', False):
-    logging.debug("Enabling basic HTTP authentication. Username and "
+    LOGGER.debug("Enabling basic HTTP authentication. Username and "
                   "password required to access the service.")
     import hashlib
 
@@ -196,9 +196,9 @@ def send_email(to, subject, template):
         try:
             mail.send(msg)
         except IOError:
-            logging.error("Can't send email to %s", to)
+            LOGGER.error("Can't send email to %s", to)
     else:
-        logging.debug("setup user verification by email")
+        LOGGER.debug("setup user verification by email")
 
 
 def generate_confirmation_token(email):
@@ -235,7 +235,7 @@ def check_login(emailid, password):
     try:
         user = User.query.filter_by(emailid=str(emailid)).first()
     except sqlalchemy.exc.OperationalError as ex:
-        logging.debug("Problem in the database (%ex), likely version client different", ex)
+        LOGGER.debug("Problem in the database (%ex), likely version client different", ex)
         return False
     if user is not None:
         if mscolab_settings.MAIL_ENABLED:
@@ -274,7 +274,7 @@ def verify_user(func):
         try:
             user = User.verify_auth_token(request.args.get('token', request.form.get('token', False)))
         except TypeError:
-            logging.debug("no token in request form")
+            LOGGER.debug("no token in request form")
             abort(404)
         if not user:
             return "False"
@@ -379,7 +379,7 @@ def get_auth_token():
                 'token': token,
                 'user': {'username': user.username, 'id': user.id}})
     else:
-        logging.debug("Unauthorized user: %s", emailid)
+        LOGGER.debug("Unauthorized user: %s", emailid)
         return "False"
 
 
@@ -870,7 +870,7 @@ def reset_request():
                 return render_template('user/status.html')
         return render_template('user/reset_request.html', form=form)
     else:
-        logging.warning("To send emails, the value of `MAIL_ENABLED` in `conf.py` should be set to True.")
+        LOGGER.warning("To send emails, the value of `MAIL_ENABLED` in `conf.py` should be set to True.")
         return render_template('errors/403.html'), 403
 
 
@@ -975,7 +975,7 @@ if mscolab_settings.USE_SAML2:
                 APP.add_url_rule(f'/{assertion_consumer_endpoint}/', assertion_consumer_endpoint,
                                  create_acs_post_handler(idp_config), methods=['POST'])
         except (NameError, AttributeError, KeyError) as ex:
-            logging.warning("USE_SAML2 is %s, Failure is: %s", mscolab_settings.USE_SAML2, ex)
+            LOGGER.warning("USE_SAML2 is %s, Failure is: %s", mscolab_settings.USE_SAML2, ex)
 
     @APP.route('/idp_login_auth/', methods=['POST'])
     def idp_login_auth():

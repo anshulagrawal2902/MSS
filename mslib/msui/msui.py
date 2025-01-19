@@ -40,7 +40,7 @@ from packaging import version
 from mslib import __version__
 from mslib.msui.msui_mainwindow import MSUIMainWindow
 from mslib.msui import constants
-from mslib.utils import setup_logging
+from mslib.utils import setup_logging, LOGGER
 from mslib.msui.icons import icons
 from mslib.utils.config import read_config_file
 from PyQt5 import QtGui, QtCore, QtWidgets
@@ -58,7 +58,7 @@ def main(tutorial_mode=False):
       """
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--version", help="show version", action="store_true", default=False)
-    parser.add_argument("--debug", help="show debugging log messages on console", action="store_true", default=False)
+    parser.add_argument("--loglevel", help="set logging level", dest="loglevel", default=logging.INFO)
     parser.add_argument("--logfile", help="Specify logfile location. Set to empty string to disable.", action="store",
                         default=os.path.join(constants.MSUI_CONFIG_PATH, "msui.log"))
 
@@ -72,17 +72,17 @@ def main(tutorial_mode=False):
         print("Version:", __version__)
         sys.exit()
 
-    setup_logging(args)
+    setup_logging(logfile=args.logfile, levelno= int(args.loglevel))
 
-    logging.info("MSS Version: %s", __version__)
-    logging.info("Python Version: %s", sys.version)
-    logging.info("Platform: %s (%s)", platform.platform(), platform.architecture())
+    LOGGER.info("MSS Version: %s", __version__)
+    LOGGER.info("Python Version: %s", sys.version)
+    LOGGER.info("Platform: %s (%s)", platform.platform(), platform.architecture())
 
     try:
         read_config_file()
     except (FileNotFoundError, fs.errors.CreateFailed, fs.errors.FileExpected) as ex:
         message = f'\n\nFix the setup of your "MSUI_SETTINGS" configuration.\n{ex}'
-        logging.error(message)
+        LOGGER.error(message)
         sys.exit()
 
     application = QtWidgets.QApplication(sys.argv)

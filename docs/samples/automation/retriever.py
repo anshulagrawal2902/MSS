@@ -118,7 +118,7 @@ def main():
        and, for hsec only, the elevation to plot (if necessary).
     """)
     parser.add_argument("-v", "--version", help="show version", action="store_true", default=False)
-    parser.add_argument("--debug", help="show debugging log messages on console", action="store_true", default=False)
+    parser.add_argument("--loglevel", help="set logging level", dest="loglevel", default=int(logging.INFO))
     parser.add_argument("--logfile", help="Specify logfile location. Set to empty string to disable.", action="store",
                         default=os.path.join(mslib.msui.constants.MSUI_CONFIG_PATH, "msui.log"))
     args = parser.parse_args()
@@ -131,7 +131,7 @@ def main():
         print("Version:", mslib.__version__)
         sys.exit()
 
-    mslib.utils.setup_logging(args)
+    mslib.utils.setup_logging(levelno=args.loglevel, logfile=args.logfile)
     read_config_file(path=mslib.msui.constants.MSUI_SETTINGS)
     config = config_loader()
     num_interpolation_points = config["num_interpolation_points"]
