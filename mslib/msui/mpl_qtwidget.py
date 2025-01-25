@@ -113,6 +113,7 @@ class ViewPlotter:
 
     def draw_metadata(self, title="", init_time=None, valid_time=None,
                       level=None, style=None):
+
         if style:
             title += f" ({style})"
         if level:
@@ -733,7 +734,9 @@ class LinearViewPlotter(ViewPlotter):
             raise NotImplementedError
 
     def draw_image(self, xmls, colors=None, scales=None):
+        title = self.fig._suptitle.get_text()
         self.clear_figure()
+        self.fig.suptitle(title, x=0.95, ha='right')
         offset = 40
         self.ax.patch.set_visible(False)
 

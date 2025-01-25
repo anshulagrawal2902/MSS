@@ -29,13 +29,13 @@ jobs:
           sed -e "s/.*://" > requirements.tmp.txt
         cat requirements.d/development.txt >> requirements.tmp.txt
         echo "pytest-randomly" >> requirements.tmp.txt
-        sed -e '/^$/d' -e '/^#.*$/d' requirements.tmp.txt > requirements.txt
+        sed -e '/^$/d' -e '/^#.*$/d' -e 's/\s*# \[not win\]$//' requirements.tmp.txt > requirements.txt
         rm requirements.tmp.txt
         cat requirements.txt
     - name: Get current year and calendar week
       id: year-and-week
       run: echo "year-and-week=$(date +%Y-%V)" >> "$GITHUB_OUTPUT"
-    - uses: mamba-org/setup-micromamba@v1
+    - uses: mamba-org/setup-micromamba@v2
       with:
         environment-file: requirements.txt
         environment-name: ci
@@ -44,8 +44,4 @@ jobs:
         cache-environment-key: environment-${{ steps.year-and-week.outputs.year-and-week }}
     - name: Run tests
       timeout-minutes: 40
-      # The ignored files can somehow cause the test suite to timeout.
-      # I have no idea yet on why this happens and how to fix it.
-      # Even a module level skip is not enough, they need to be completely ignored.
-      # TODO: fix those tests and drop the ignores
       run: micromamba run -n ci env QT_QPA_PLATFORM=offscreen pytest -v -n logical --durations=20 --cov=mslib tests
