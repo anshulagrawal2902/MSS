@@ -398,6 +398,99 @@ Common resources that a test might need,
 like e.g. a running MSColab server or a QApplication instance for GUI tests,
 are collected in :mod:`tests.fixtures` in the form of pytest fixtures that can be requested as needed in tests.
 
+Keyring Features
+-----------------
+
+This document outlines step-by-step instructions for using the keyring features using the command line.
+
+Prerequisites
+..............
+
+1. **Confirm the Default Keyring Backend**
+
+   Use the following command to list available keyring backends and check which one is currently in use:
+
+   .. code-block:: bash
+
+       keyring --list-backends
+
+Command-Line Commands for Keyring
+..................................
+
+1. **Set a Password**
+
+   Store a password for a specific service and user:
+  
+   .. code-block:: bash
+
+       keyring set SERVICE_NAME USERNAME
+
+   **Example:**
+
+  - Case 1: Standard Service Name
+   .. code-block:: bash
+
+       keyring set http://localhost:8083 myname@mydomain
+
+  - Case 2: Custom Authentication Service
+   .. code-block:: bash
+    
+       keyring set MSCOLAB_AUTH_http://localhost:8083 mscolab
+
+  - The command will securely prompt you to input a password (e.g., `example_password`).
+
+2. **Get a Password**
+
+   Retrieve the stored password for a service and user:
+
+   .. code-block:: bash
+
+       keyring get SERVICE_NAME USERNAME
+
+   **Example:**
+
+   - Case 1: Standard Service Name
+   .. code-block:: bash
+
+       keyring get http://localhost:8083 myname@mydomain
+
+   - Case 2: Custom Authentication Service
+   .. code-block:: bash
+
+       keyring get MSCOLAB_AUTH_http://localhost:8083 mscolab
+
+   **Output:**
+
+   .. code-block::
+
+       example_password
+
+3. **Delete a Password**
+
+   Remove the stored password for a service and user:
+
+   .. code-block:: bash
+
+       keyring delete SERVICE_NAME USERNAME
+
+   **Example:**
+
+  - Case 1: Standard Service Name
+   .. code-block:: bash
+
+       keyring delete http://localhost:8083 myname@mydomain
+  
+  - Case 2: Custom Authentication Service
+   .. code-block:: bash
+
+       keyring delete MSCOLAB_AUTH_http://localhost:8083 mscolab
+
+   To confirm the deletion, attempt to retrieve the password:
+
+   .. code-block:: bash
+
+       keyring get MSCOLAB_AUTH_http://localhost:8083 mscolab
+       
 
 Changing the database model
 ---------------------------
