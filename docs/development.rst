@@ -420,7 +420,7 @@ Command-Line Commands for Keyring
 1. **Set a Password**
 
    Store a password for a specific service and user:
-  
+
    .. code-block:: bash
 
        keyring set SERVICE_NAME USERNAME
@@ -434,7 +434,7 @@ Command-Line Commands for Keyring
 
   - Case 2: Custom Authentication Service
    .. code-block:: bash
-    
+
        keyring set MSCOLAB_AUTH_http://localhost:8083 mscolab
 
   - The command will securely prompt you to input a password (e.g., `example_password`).
@@ -479,7 +479,7 @@ Command-Line Commands for Keyring
    .. code-block:: bash
 
        keyring delete http://localhost:8083 myname@mydomain
-  
+
   - Case 2: Custom Authentication Service
    .. code-block:: bash
 
@@ -490,7 +490,7 @@ Command-Line Commands for Keyring
    .. code-block:: bash
 
        keyring get MSCOLAB_AUTH_http://localhost:8083 mscolab
-       
+
 
 Changing the database model
 ---------------------------
