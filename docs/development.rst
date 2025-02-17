@@ -17,6 +17,15 @@ When it is ready the developer version becomes the next stable.
 
 The stable version of MSS is tracked on `BLACK DUCK Open Hub <https://www.openhub.net/p/mss>`_
 
+
+Contributing
+------------
+
+Please read our `contributing <https://open-mss.github.io/contributing/>`_ guidelines and
+`setup instructions <https://open-mss.github.io/develop/Setup-Instructions>`_ to get
+started with MSS development.
+
+
 Using our Issue Tracker on github
 ---------------------------------
 
@@ -35,9 +44,6 @@ First, please refer to the applicable `GitHub repository <https://github.com/Ope
 Then, please `create a new issue <https://github.com/Open-MSS/MSS/issues/new>`_ in the GitHub repository describing your enhancement.
 
 Be sure to include as much detail as possible including step-by-step descriptions, specific examples, screenshots or mockups, and reasoning for why the enhancement might be worthwhile.
-
-
-
 
 
 Forking the Repo
@@ -262,7 +268,6 @@ The content of the dummy data can be found in the file `mslib/mscolab/seed.py`.
 To start your server use the command :code:`python mslib/mscolab/mscolab.py start`. This would start the MSColab server on port 8083.
 Going to http://localhost:8083/status should now show "MSColab server". This means your server has started successfully.
 Now you can use the MSS desktop application to connect to it using the MSColab window of the application.
-
 
 
 Code Style
