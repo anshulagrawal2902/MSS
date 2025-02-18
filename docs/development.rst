@@ -476,19 +476,19 @@ Command-Line Commands for Keyring
 
    .. code-block:: bash
 
-       keyring delete SERVICE_NAME USERNAME
+       keyring del SERVICE_NAME USERNAME
 
    **Example:**
 
   - Case 1: Standard Service Name
    .. code-block:: bash
 
-       keyring delete http://localhost:8083 myname@mydomain
+       keyring del http://localhost:8083 myname@mydomain
 
   - Case 2: Custom Authentication Service
    .. code-block:: bash
 
-       keyring delete MSCOLAB_AUTH_http://localhost:8083 mscolab
+       keyring del MSCOLAB_AUTH_http://localhost:8083 mscolab
 
    To confirm the deletion, attempt to retrieve the password:
 
