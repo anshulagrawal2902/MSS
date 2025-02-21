@@ -892,10 +892,20 @@ class Test_Mscolab:
         self._create_user(qtbot, "something", "something@something.org", "something")
         u_id = self.window.mscolab.user['id']
         self.window.mscolab.open_profile_window()
+        # Uses 'TestKeyring' from conftest.py for verification.
+        assert self.url + "something@something.org" in mslib.utils.auth.keyring.get_keyring().passwords
+        assert "MSCOLAB_AUTH_" + self.url, "something@something.org" in mslib.utils.auth.keyring.get_keyring().passwords
         QtTest.QTest.mouseClick(self.window.mscolab.profile_dialog.deleteAccountBtn, QtCore.Qt.LeftButton)
         assert self.window.listOperationsMSC.model().rowCount() == 0
         assert self.window.usernameLabel.isVisible() is False
         assert self.window.connectBtn.isVisible() is True
+        assert (
+            self.url + "something@something.org"
+            not in mslib.utils.auth.keyring.get_keyring().passwords
+        )
+        assert "MSCOLAB_AUTH_" + self.url, "something@something.org" not in (
+            mslib.utils.auth.keyring.get_keyring().passwords
+        )
         with self.app.app_context():
             assert User.query.filter_by(emailid='something').count() == 0
             assert Permission.query.filter_by(u_id=u_id).count() == 0
