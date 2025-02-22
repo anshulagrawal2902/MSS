@@ -110,7 +110,7 @@ class WaypointsPath(mpath.Path):
            matplotlib.Path) at the given index.
         """
         self.vertices = np.insert(self.vertices, index,
-                                  np.asarray(vertex, np.float_), axis=0)
+                                  np.asarray(vertex, np.float64), axis=0)
         self.codes = np.insert(self.codes, index, code, axis=0)
 
     def index_of_closest_segment(self, x, y, eps=5):

@@ -6,4 +6,6 @@ ignore-words-list = [
     "doubleClick",
     "indexIn",
     "socio-economic",
+    "EMAC",
+    "emac"
 ]

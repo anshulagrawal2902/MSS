@@ -17,6 +17,15 @@ When it is ready the developer version becomes the next stable.
 
 The stable version of MSS is tracked on `BLACK DUCK Open Hub <https://www.openhub.net/p/mss>`_
 
+
+Contributing
+------------
+
+Please read our `contributing <https://open-mss.github.io/contributing/>`_ guidelines and
+`setup instructions <https://open-mss.github.io/develop/Setup-Instructions>`_ to get
+started with MSS development.
+
+
 Using our Issue Tracker on github
 ---------------------------------
 
@@ -35,9 +44,6 @@ First, please refer to the applicable `GitHub repository <https://github.com/Ope
 Then, please `create a new issue <https://github.com/Open-MSS/MSS/issues/new>`_ in the GitHub repository describing your enhancement.
 
 Be sure to include as much detail as possible including step-by-step descriptions, specific examples, screenshots or mockups, and reasoning for why the enhancement might be worthwhile.
-
-
-
 
 
 Forking the Repo
@@ -226,7 +232,7 @@ This can be used to run tests on an invisible virtual display by prepending the 
   $ xvfb-run pytest ...
 
 We have implemented demodata as data base for testing. On first call of pytest a set of demodata becomes stored
-in a /tmp/mss* folder. If you have installed gitpython a postfix of the revision head is added.
+in a /tmp/mss* folder.
 
 
 Setup MSWMS server
@@ -262,7 +268,6 @@ The content of the dummy data can be found in the file `mslib/mscolab/seed.py`.
 To start your server use the command :code:`python mslib/mscolab/mscolab.py start`. This would start the MSColab server on port 8083.
 Going to http://localhost:8083/status should now show "MSColab server". This means your server has started successfully.
 Now you can use the MSS desktop application to connect to it using the MSColab window of the application.
-
 
 
 Code Style
@@ -398,6 +403,99 @@ Common resources that a test might need,
 like e.g. a running MSColab server or a QApplication instance for GUI tests,
 are collected in :mod:`tests.fixtures` in the form of pytest fixtures that can be requested as needed in tests.
 
+Keyring Features
+-----------------
+
+This document outlines step-by-step instructions for using the keyring features using the command line.
+
+Prerequisites
+..............
+
+1. **Confirm the Default Keyring Backend**
+
+   Use the following command to list available keyring backends and check which one is currently in use:
+
+   .. code-block:: bash
+
+       keyring --list-backends
+
+Command-Line Commands for Keyring
+..................................
+
+1. **Set a Password**
+
+   Store a password for a specific service and user:
+
+   .. code-block:: bash
+
+       keyring set SERVICE_NAME USERNAME
+
+   **Example:**
+
+  - Case 1: Standard Service Name
+   .. code-block:: bash
+
+       keyring set http://localhost:8083 myname@mydomain
+
+  - Case 2: Custom Authentication Service
+   .. code-block:: bash
+
+       keyring set MSCOLAB_AUTH_http://localhost:8083 mscolab
+
+  - The command will securely prompt you to input a password (e.g., `example_password`).
+
+2. **Get a Password**
+
+   Retrieve the stored password for a service and user:
+
+   .. code-block:: bash
+
+       keyring get SERVICE_NAME USERNAME
+
+   **Example:**
+
+   - Case 1: Standard Service Name
+   .. code-block:: bash
+
+       keyring get http://localhost:8083 myname@mydomain
+
+   - Case 2: Custom Authentication Service
+   .. code-block:: bash
+
+       keyring get MSCOLAB_AUTH_http://localhost:8083 mscolab
+
+   **Output:**
+
+   .. code-block::
+
+       example_password
+
+3. **Delete a Password**
+
+   Remove the stored password for a service and user:
+
+   .. code-block:: bash
+
+       keyring del SERVICE_NAME USERNAME
+
+   **Example:**
+
+  - Case 1: Standard Service Name
+   .. code-block:: bash
+
+       keyring del http://localhost:8083 myname@mydomain
+
+  - Case 2: Custom Authentication Service
+   .. code-block:: bash
+
+       keyring del MSCOLAB_AUTH_http://localhost:8083 mscolab
+
+   To confirm the deletion, attempt to retrieve the password:
+
+   .. code-block:: bash
+
+       keyring get MSCOLAB_AUTH_http://localhost:8083 mscolab
+
 
 Changing the database model
 ---------------------------
@@ -478,7 +576,6 @@ using a local meta.yaml recipe::
   $ mamba create -n mssbuildtest
   $ mamba activate mssbuildtest
   $ mamba install -c local mss
-
 
 Take care on removing alpha builds, or increase the build number for a new version.
 

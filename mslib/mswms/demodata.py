@@ -1161,7 +1161,7 @@ from mslib.mswms.demodata import (data, epsg_to_mpl_basemap_table,
             newvar.units = unit
             newvar[:] = test_data
             newvar.grid_mapping = 'LatLon_Projection'
-            newvar.missing_value = float('nan')
+            newvar.missing_value = np.nan
 
         ecmwf.close()
 

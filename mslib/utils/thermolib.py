@@ -133,7 +133,7 @@ _STANDARD_ATMOSPHERE = [
     (32 * units.km, 228.65 * units.K, 868.019 * units.Pa, -0.0028 * units.K / units.m),
     (47 * units.km, 270.65 * units.K, 110.906 * units.Pa, 0 * units.K / units.m),
     (51 * units.km, 270.65 * units.K, 66.9389 * units.Pa, 0.0028 * units.K / units.m),
-    (71 * units.km, 214.65 * units.K, 3.95642 * units.Pa, float("NaN") * units.K / units.m)
+    (71 * units.km, 214.65 * units.K, 3.95642 * units.Pa, np.nan * units.K / units.m)
 ]
 _HEIGHT, _TEMPERATURE, _PRESSURE, _TEMPERATURE_GRADIENT = 0, 1, 2, 3
 
