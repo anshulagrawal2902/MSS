@@ -11976,8 +11976,8 @@ packages:
   timestamp: 1707226459646
 - pypi: .
   name: open-mss
-  version: 9.3.0
-  sha256: 60cb74c7ba21a0f29054520883482664a2c8abbffab532aa6b4a0a55d1317723
+  version: 9.3.1
+  sha256: 1637f6eb8f19c8a0c14a246c545bb6cab7446313ad2ef9b75ae8eb4d25f59ff7
   editable: true
 - conda: https://conda.anaconda.org/conda-forge/linux-64/opencv-4.7.0-py311h38be061_6.conda
   sha256: 045d7df932b7c798410c7a0870c2a7eea2e091d6d4729fa3a4d42b91c01666a9
