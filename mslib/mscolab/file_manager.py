@@ -30,7 +30,6 @@ import time
 import datetime
 import fs
 import difflib
-import logging
 import git
 import threading
 import mimetypes

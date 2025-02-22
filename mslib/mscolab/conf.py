@@ -25,7 +25,6 @@
     limitations under the License.
 """
 import os
-import logging
 import secrets
 import sys
 import warnings

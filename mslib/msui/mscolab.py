@@ -34,7 +34,6 @@ import io
 import sys
 import json
 import hashlib
-import logging
 import types
 import fs
 import functools

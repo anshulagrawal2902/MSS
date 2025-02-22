@@ -26,7 +26,6 @@
 
 import socketio
 import json
-import logging
 
 import requests
 from urllib.parse import urljoin

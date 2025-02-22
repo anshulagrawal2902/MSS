@@ -28,7 +28,6 @@
 
 from datetime import datetime
 
-import logging
 import os
 from abc import ABCMeta, abstractmethod
 

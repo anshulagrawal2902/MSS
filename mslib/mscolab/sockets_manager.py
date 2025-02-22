@@ -25,7 +25,6 @@
     limitations under the License.
 """
 import json
-import logging
 from flask import request
 from flask_socketio import SocketIO, join_room, leave_room
 

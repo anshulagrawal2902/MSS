@@ -29,7 +29,6 @@
 """
 
 import functools
-import logging
 
 from mslib.utils.config import config_loader
 from mslib.utils.get_projection_params import get_projection_params

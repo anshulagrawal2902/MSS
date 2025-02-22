@@ -44,7 +44,6 @@
     limitations under the License.
 """
 
-import logging
 import math
 import numpy as np
 import matplotlib.path as mpath

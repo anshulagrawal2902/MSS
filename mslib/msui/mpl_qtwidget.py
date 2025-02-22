@@ -33,7 +33,6 @@ from datetime import datetime
 import enum
 import os
 import six
-import logging
 import numpy as np
 import matplotlib
 from fs import open_fs

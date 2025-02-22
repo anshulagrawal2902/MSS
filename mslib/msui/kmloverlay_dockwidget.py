@@ -26,7 +26,6 @@
 """
 import copy
 import fs
-import logging
 from fastkml import kml, geometry, styles
 from lxml import etree as et, objectify
 import os

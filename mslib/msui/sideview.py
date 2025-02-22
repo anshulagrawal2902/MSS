@@ -26,7 +26,6 @@
     limitations under the License.
 """
 
-import logging
 import functools
 from PyQt5 import QtGui, QtWidgets, QtCore
 from mslib.msui.qt5 import ui_sideview_window as ui

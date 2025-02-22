@@ -29,7 +29,6 @@
 
 import fs
 import os
-import logging
 import platformdirs
 
 from mslib.utils import LOGGER

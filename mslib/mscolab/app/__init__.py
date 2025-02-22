@@ -25,7 +25,6 @@
 """
 
 import os
-import logging
 import sqlalchemy
 
 from flask_migrate import Migrate

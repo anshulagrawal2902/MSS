@@ -27,7 +27,6 @@
 import collections.abc
 import copy
 import fs
-import logging
 import json
 
 from mslib.utils.qt import get_open_filename, get_save_filename, show_popup

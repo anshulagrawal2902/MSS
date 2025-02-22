@@ -25,7 +25,6 @@
     limitations under the License.
 """
 import numpy as np
-import logging
 
 from PyQt5 import QtWidgets
 from mslib.msui.qt5 import ui_hexagon_dockwidget as ui

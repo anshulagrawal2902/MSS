@@ -25,7 +25,6 @@
 """
 import fs
 import os
-import logging
 
 from mslib.mscolab.conf import mscolab_settings
 from mslib.utils import LOGGER

@@ -31,7 +31,6 @@ from datetime import datetime
 
 import io
 import hashlib
-import logging
 import mpl_toolkits.basemap as basemap
 import os
 import requests
