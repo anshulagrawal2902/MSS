@@ -452,7 +452,7 @@ Installing
 ~~~~~~~~~~
 It is easy to configure and runs on CPython on Unix and Windows. ::
 
-   mamba install waitress
+   pixi global install waitress
 
 wms.wsgi
 ~~~~~~~~
