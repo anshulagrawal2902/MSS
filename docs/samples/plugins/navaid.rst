@@ -45,5 +45,3 @@ Installation
        cd MSS
        pixi shell
        pixi add geomag geopy geographiclib
-
-
