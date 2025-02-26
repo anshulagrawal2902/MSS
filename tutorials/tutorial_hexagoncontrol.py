@@ -45,7 +45,7 @@ def automate_hexagoncontrol():
     # Changing map to Global
     find_and_click_picture('topviewwindow-00-global-cyl.png',
                            "Map change dropdown could not be located on the screen")
-    select_listelement(2)
+    select_listelement(7)
     # Zooming into the map
     zoom_in('topviewwindow-zoom.png', 'Zoom button could not be located on the screen',
             move=(379, 205), dragRel=(70, 75))
